@@ -22,6 +22,18 @@
     .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #ccc; }
     .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #555; background: #333; color: #fff; }
 
+    /* CSS cho menu gợi ý địa chỉ Autocomplete */
+    .autocomplete-container { position: relative; flex: 1; }
+    .autocomplete-list {
+        position: absolute; top: 100%; left: 0; right: 0;
+        background: #333; color: #fff; border: 1px solid #555; border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 1000;
+        max-height: 250px; overflow-y: auto; display: none; margin: 5px 0 0 0; padding: 0; list-style: none;
+    }
+    .autocomplete-list li { padding: 12px 15px; border-bottom: 1px solid #444; cursor: pointer; line-height: 1.4; }
+    .autocomplete-list li:hover { background: #4a4a4a; color: #e6bc53; }
+    .autocomplete-list i { color: #f39c12; margin-right: 8px; }
+
     .filter-bar { display: flex; gap: 15px; margin: 30px 0 15px 0; background: #1a1a1a; padding: 15px; border-radius: 8px; }
     .filter-bar input, .filter-bar select { padding: 10px; border-radius: 5px; border: 1px solid #444; background: #2a2a2a; color: #fff; width: 100%; outline: none; }
 
@@ -56,11 +68,16 @@
                 <option value="2">Giao hàng tận nơi</option>
             </select>
         </div>
-        <div id="divDiaChi" class="form-group" style="display: none;">
+        <div id="divDiaChi" class="form-group" style="display: none; flex: 2;">
             <label>Địa chỉ nhận hàng (hoặc dán link Google Maps)</label>
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="DiaChiGiaoHang" placeholder="Nhập địa chỉ hoặc dán link Google Maps..." style="flex: 1;" />
-                <button type="button" class="btn-check-address" id="btnTinhShip" onclick="calculateDistance()">
+            <div style="display: flex; gap: 10px;">
+                <div class="autocomplete-container">
+                    <input type="text" id="DiaChiGiaoHang" placeholder="Nhập địa chỉ hoặc dán link Google Maps..." 
+                           style="width: 100%;" oninput="suggestAddress()" autocomplete="off" />
+                    <ul id="addressSuggestions" class="autocomplete-list"></ul>
+                </div>
+
+                <button type="button" class="btn-check-address" id="btnTinhShip" onclick="calculateDistance()" style="padding: 0 20px;">
                     <i class="fas fa-map-marker-alt"></i> Tính ship
                 </button>
             </div>
@@ -68,7 +85,7 @@
     </div>
 
     <div id="shipResult" class="ship-info-box" style="display: none; background:#2c3e50; padding:15px; border-radius:8px; margin:15px 0;">
-        <span><i class="fas fa-route"></i> Quãng đường: <strong id="lblKm">0</strong> km</span>
+        <span style="margin-right: 20px;"><i class="fas fa-route"></i> Quãng đường: <strong id="lblKm">0</strong> km</span>
         <span><i class="fas fa-money-bill-wave"></i> Phí ship: <strong id="lblPhiShip">0</strong> VNĐ</span>
     </div>
 
@@ -166,7 +183,62 @@
     let totalFood = 0, shipFee = 0, distanceKm = 0;
     const QUAN_LAT = 10.9738343;
     const QUAN_LON = 106.4699543;
+    const GOONG_API_KEY = 'MbJLDyKROunSpkmm58CptcZLRpMqwueSXZJy7IwV'; // API Key của bạn
 
+    // ==========================================
+    // TÍNH NĂNG GỢI Ý ĐỊA CHỈ (AUTOCOMPLETE)
+    // ==========================================
+    let typingTimer;
+    
+    async function suggestAddress() {
+        clearTimeout(typingTimer);
+        const input = document.getElementById('DiaChiGiaoHang').value.trim();
+        const suggestionBox = document.getElementById('addressSuggestions');
+
+        if (input.length < 3 || input.includes('http') || input.includes('@@')) {
+            suggestionBox.style.display = 'none';
+            return;
+        }
+
+        typingTimer = setTimeout(async () => {
+            try {
+                const url = `https://rsapi.goong.io/Place/AutoComplete?api_key=${GOONG_API_KEY}&location=${QUAN_LAT},${QUAN_LON}&radius=50000&input=${encodeURIComponent(input)}`;
+                
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.predictions && data.predictions.length > 0) {
+                    let html = '';
+                    data.predictions.forEach(p => {
+                        const safeDesc = p.description.replace(/'/g, "\\'");
+                        html += `<li onclick="selectAddress('${safeDesc}')"><i class="fas fa-map-marker-alt"></i> ${p.description}</li>`;
+                    });
+                    suggestionBox.innerHTML = html;
+                    suggestionBox.style.display = 'block';
+                } else {
+                    suggestionBox.style.display = 'none';
+                }
+            } catch (e) {
+                console.error("Lỗi gợi ý địa chỉ:", e);
+            }
+        }, 500);
+    }
+
+    function selectAddress(address) {
+        document.getElementById('DiaChiGiaoHang').value = address;
+        document.getElementById('addressSuggestions').style.display = 'none';
+        document.getElementById('btnTinhShip').click(); 
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!document.getElementById('DiaChiGiaoHang').contains(e.target)) {
+            document.getElementById('addressSuggestions').style.display = 'none';
+        }
+    });
+
+    // ==========================================
+    // CÁC HÀM XỬ LÝ CHÍNH
+    // ==========================================
     function removeAccents(str) {
         return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
     }
@@ -195,11 +267,7 @@
         let latDest = null, lonDest = null;
 
         try {
-            // --- BƯỚC 1: TRÍCH XUẤT TỌA ĐỘ ---
-            // Dùng mã ASCII để tránh việc C# (Razor) đọc nhầm ký tự đặc biệt
             const atChar = String.fromCharCode(64); 
-            
-            // Tìm tọa độ trong link Google Maps (định dạng lat,lon hoặc share link)
             let match = input.match(new RegExp(atChar + "(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)"));
             if (!match) match = input.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
 
@@ -207,28 +275,33 @@
                 latDest = parseFloat(match[1]);
                 lonDest = parseFloat(match[2]);
             } else {
-                // Nếu là địa chỉ chữ, dùng Nominatim để đổi ra tọa độ
-                const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input + ", Hồ Chí Minh")}&limit=1`);
+                const geoUrl = `https://rsapi.goong.io/geocode?address=${encodeURIComponent(input + ", Hồ Chí Minh")}&api_key=${GOONG_API_KEY}`;
+                
+                const geoRes = await fetch(geoUrl);
                 const geoData = await geoRes.json();
-                if (geoData.length > 0) {
-                    latDest = geoData[0].lat;
-                    lonDest = geoData[0].lon;
+
+                if (geoData.results && geoData.results.length > 0) {
+                    latDest = geoData.results[0].geometry.location.lat;
+                    lonDest = geoData.results[0].geometry.location.lng;
+                } else {
+                    throw new Error("Không tìm thấy địa chỉ này trên bản đồ. Vui lòng ghi rõ tên đường, phường/xã nhé!");
                 }
             }
 
             if (!latDest || !lonDest) throw new Error("Không xác định được vị trí");
 
-            // --- BƯỚC 2: TÌM TUYẾN ĐƯỜNG & LẤY KHOẢNG CÁCH ---
-            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${QUAN_LON},${QUAN_LAT};${lonDest},${latDest}?overview=false`;
+            const directionUrl = `https://rsapi.goong.io/Direction?origin=${QUAN_LAT},${QUAN_LON}&destination=${latDest},${lonDest}&vehicle=bike&api_key=${GOONG_API_KEY}`;
             
-            const routeRes = await fetch(osrmUrl);
+            const routeRes = await fetch(directionUrl);
             const routeData = await routeRes.json();
 
-            if (routeData.code !== 'Ok') throw new Error("Không tìm thấy đường đi");
+            if (!routeData.routes || routeData.routes.length === 0) {
+                throw new Error("Không tìm thấy tuyến đường đi đến địa chỉ này!");
+            }
 
-            distanceKm = (routeData.routes[0].distance / 1000).toFixed(1);
+            const distanceMeters = routeData.routes[0].legs[0].distance.value;
+            distanceKm = (distanceMeters / 1000).toFixed(1);
 
-            // --- BƯỚC 3: HIỂN THỊ & TÍNH TIỀN ---
             renderShipResult(distanceKm);
 
         } catch (error) {
@@ -281,9 +354,9 @@
     }
 
     function updateAllTotals() {
-        document.getElementById('sumFood').innerText = totalFood.toLocaleString('vi-VN');
-        document.getElementById('sumShip').innerText = shipFee.toLocaleString('vi-VN');
-        document.getElementById('sumTotal').innerText = (totalFood + shipFee).toLocaleString('vi-VN');
+        if(document.getElementById('sumFood')) document.getElementById('sumFood').innerText = totalFood.toLocaleString('vi-VN');
+        if(document.getElementById('sumShip')) document.getElementById('sumShip').innerText = shipFee.toLocaleString('vi-VN');
+        if(document.getElementById('sumTotal')) document.getElementById('sumTotal').innerText = (totalFood + shipFee).toLocaleString('vi-VN');
     }
 
     function filterMenu() {
@@ -302,6 +375,13 @@
         if (ht == "2" && shipFee <= 0) return alert("Vui lòng tính phí ship trước!");
 
         document.getElementById('lblHinhThuc').innerText = (ht == "1") ? "Đến quán lấy" : "Giao hàng tận nơi";
+        
+        if (ht == "2") {
+             document.getElementById('liDiaChi').style.display = 'block';
+             document.getElementById('lblDiaChi').innerText = document.getElementById('DiaChiGiaoHang').value;
+        } else {
+             document.getElementById('liDiaChi').style.display = 'none';
+        }
 
         let html = "";
         let foodTotal = 0;
