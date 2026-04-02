@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "Đổi Mật Khẩu Mới";
+    Layout = null; 
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Bò Tơ Chính Cư</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #4A2E2B; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-container { background-color: #ffffff; width: 100%; max-width: 450px; padding: 40px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); box-sizing: border-box; }
+        .brand-name { color: #8B0000; text-align: center; font-family: 'Brush Script MT', cursive; font-size: 46px; margin: 0 0 5px 0; font-weight: normal; }
+        .page-title { text-align: center; color: #666; text-transform: uppercase; letter-spacing: 1px; font-size: 15px; margin-bottom: 25px; font-weight: bold; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #333; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888; }
+        .form-control { width: 100%; padding: 12px 15px 12px 40px; border: 1px solid #ddd; border-radius: 5px; background-color: #f4f8fb; box-sizing: border-box; font-size: 14px; outline: none; transition: 0.3s; }
+        .form-control:focus { border-color: #8B0000; background-color: #fff; box-shadow: 0 0 5px rgba(139, 0, 0, 0.2); }
+        .btn-submit { width: 100%; padding: 14px; background-color: #990000; color: white; border: none; border-radius: 5px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s; margin-top: 10px; text-transform: uppercase;}
+        .btn-submit:hover { background-color: #7a0000; }
+        .alert-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 12px; border-radius: 5px; text-align: center; font-size: 13px; margin-bottom: 20px; font-weight: bold; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; border-radius: 5px; text-align: center; font-size: 13px; margin-bottom: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2 class="brand-name">Bò Tơ Chính Cư</h2>
+        <p class="page-title">Cập Nhật Mật Khẩu</p>
+
+        @if (TempData["WarningMessage"] != null)
+        {
+            <div class="alert-warning">
+                <i class="fas fa-shield-alt"></i> @TempData["WarningMessage"]
+            </div>
+        }
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert-error">
+                <i class="fas fa-exclamation-triangle"></i> @ViewBag.Error
+            </div>
+        }
+
+        <form action="/Account/DatLaiMatKhau" method="post">
+            <div class="form-group">
+                <label>Mật khẩu hiện tại (hoặc mã tạm)</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-unlock-alt"></i>
+                    <input type="password" name="matKhauCu" class="form-control" required placeholder="Nhập mật khẩu hiện tại...">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Mật khẩu mới</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="matKhauMoi" class="form-control" required placeholder="Tạo mật khẩu mới...">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Nhập lại mật khẩu mới</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-check-double"></i>
+                    <input type="password" name="xacNhanMatKhau" class="form-control" required placeholder="Xác nhận mật khẩu mới...">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-save"></i> LƯU MẬT KHẨU MỚI
+            </button>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="/" style="color: #666; font-size: 14px; text-decoration: none;">Bỏ qua và Về trang chủ</a>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

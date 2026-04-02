@@ -1,0 +1,114 @@
+﻿@model IEnumerable<WebBoTo.Models.TaiKhoan>
+@{
+    ViewData["Title"] = "Phân Quyền Hệ Thống";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Tài Khoản & Phân Quyền</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background-color: #f4f6f9; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: #8B0000; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-top: 0; }
+        h3 { color: #333; margin-top: 40px; background: #e9ecef; padding: 10px; border-radius: 5px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: middle; }
+        th { background: #343a40; color: #fff; }
+        
+        .role-form { display: flex; gap: 5px; align-items: center; }
+        .role-select { padding: 5px; border-radius: 4px; border: 1px solid #ccc; font-weight: bold; }
+        .btn-update { background: #007bff; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+        
+        .btn-lock { background: #dc3545; color: #fff; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 120px; }
+        .btn-unlock { background: #28a745; color: #fff; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 120px; }
+        .row-locked { opacity: 0.6; background-color: #f8d7da !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-users-cog"></i> Quản Lý Tài Khoản & Trạng Thái</h2>
+        <a href="/" style="display:inline-block; margin-bottom: 15px; color: #007bff; text-decoration:none;"><i class="fas fa-arrow-left"></i> Về Trang Chủ</a>
+
+        <h3><i class="fas fa-user-tie"></i> BỘ PHẬN QUẢN LÝ & NHÂN VIÊN</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Họ Tên</th>
+                <th>Email</th>
+                <th>SĐT</th>
+                <th>Quyền Hạn</th>
+                <th style="text-align: center;">Trạng Thái</th>
+            </tr>
+            @foreach (var tk in Model.Where(m => m.VaiTro == "Admin" || m.VaiTro == "NhanVien"))
+            {
+                <tr class="@(!tk.TrangThai ? "row-locked" : "")">
+                    <td>@tk.Id_TK</td>
+                    <td style="font-weight: bold;">@tk.HoTen</td>
+                    <td>@tk.Email</td>
+                    <td>@tk.SoDienThoai</td>
+                    <td>
+                        <form action="/Admin/CapNhatVaiTro" method="post" class="role-form">
+                            <input type="hidden" name="Id_TK" value="@tk.Id_TK" />
+                            <select name="VaiTroMoi" class="role-select">
+                                <!option value="Customer" @(tk.VaiTro == "Customer" ? "selected" : "")>Customer</!option>
+                                <!option value="NhanVien" @(tk.VaiTro == "NhanVien" ? "selected" : "")>Nhân Viên</!option>
+                            </select>
+                            <button type="submit" class="btn-update"><i class="fas fa-save"></i></button>
+                        </form>
+                    </td>
+                    <td style="text-align: center;">
+                        <form action="/Admin/KhoaMoTaiKhoan" method="post">
+                            <input type="hidden" name="Id_TK" value="@tk.Id_TK" />
+                            @if (tk.TrangThai) { <button type="submit" class="btn-lock"><i class="fas fa-lock"></i> Khóa TK</button> }
+                            else { <button type="submit" class="btn-unlock"><i class="fas fa-unlock"></i> Mở khóa</button> }
+                        </form>
+                    </td>
+                </tr>
+            }
+        </table>
+
+        <h3><i class="fas fa-users"></i> DANH SÁCH KHÁCH HÀNG (CUSTOMERS)</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Họ Tên</th>
+                <th>Email</th>
+                <th>SĐT</th>
+                <th>Quyền Hạn</th>
+                <th style="text-align: center;">Trạng Thái</th>
+            </tr>
+            @foreach (var tk in Model.Where(m => m.VaiTro == "Customer" || string.IsNullOrEmpty(m.VaiTro)))
+            {
+                <tr class="@(!tk.TrangThai ? "row-locked" : "")">
+                    <td>@tk.Id_TK</td>
+                    <td style="font-weight: bold;">@tk.HoTen</td>
+                    <td>@tk.Email</td>
+                    <td>@tk.SoDienThoai</td>
+                    <td>
+                        <form action="/Admin/CapNhatVaiTro" method="post" class="role-form">
+                            <input type="hidden" name="Id_TK" value="@tk.Id_TK" />
+                            <select name="VaiTroMoi" class="role-select">
+                                <!option value="Customer" selected>Customer</!option>
+                                <!option value="NhanVien">Nhân Viên</!option>
+                            </select>
+                            <button type="submit" class="btn-update" title="Nâng quyền"><i class="fas fa-arrow-up"></i></button>
+                        </form>
+                    </td>
+                    <td style="text-align: center;">
+                        <form action="/Admin/KhoaMoTaiKhoan" method="post">
+                            <input type="hidden" name="Id_TK" value="@tk.Id_TK" />
+                            @if (tk.TrangThai) { <button type="submit" class="btn-lock"><i class="fas fa-lock"></i> Khóa TK</button> }
+                            else { <button type="submit" class="btn-unlock"><i class="fas fa-unlock"></i> Mở khóa</button> }
+                        </form>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</body>
+</html>

@@ -1,0 +1,356 @@
+﻿@model WebBoTo.Models.MenuTiec
+@{
+    ViewData["Title"] = "Đặt Tiệc Tại Gia";
+}
+
+<style>
+    /* 1. NỀN VÀ KHUNG TỔNG THỂ */
+    .booking-wrapper {
+        background-color: #121212;
+        background-image: radial-gradient(#333 1px, transparent 1px);
+        background-size: 30px 30px;
+        padding: 40px 0;
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .booking-container {
+        max-width: 1500px; 
+        width: 95%;
+        margin: 0 auto;
+        background: radial-gradient(circle at top, #1a1a1a 0%, #121212 100%);
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        border: 1px solid #e6bc53;
+        display: flex;
+        overflow: hidden;
+    }
+
+    /* 2. CỘT TRÁI: CHỌN MENU */
+    .booking-left {
+        width: 60%;
+        background: rgba(20,20,20,0.9);
+        padding: 40px;
+        border-right: 1px dashed #e6bc53;
+    }
+
+    /* 3. CỘT PHẢI: FORM ĐIỀN THÔNG TIN */
+    .booking-right {
+        width: 40%;
+        padding: 40px;
+        background: transparent;
+    }
+
+    /* TIÊU ĐỀ CÁC BƯỚC */
+    .step-title {
+        color: #e6bc53;
+        font-size: 24px;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-left: 5px solid #8b0000;
+        padding-left: 15px;
+    }
+    .step-title span { color: #dc3545; }
+
+    /* DANH SÁCH MENU DẠNG LƯỚI */
+    .menu-list-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 10px;
+        padding-bottom: 10px;
+    }
+    .menu-list-container::-webkit-scrollbar { width: 6px; }
+    .menu-list-container::-webkit-scrollbar-thumb { background: #e6bc53; border-radius: 10px; }
+
+    .menu-radio { display: none; }
+    
+    /* GIAO DIỆN TỪNG THẺ MENU */
+    .menu-card-label {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: #1a1a1a;
+        border: 2px solid #444;
+        border-radius: 12px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        height: 100%;
+        box-sizing: border-box;
+    }
+    .menu-card-label:hover { border-color: #e6bc53; transform: translateY(-5px); box-shadow: 0 8px 20px rgba(230, 188, 83, 0.2); }
+    
+    .menu-radio:checked + .menu-card-label {
+        border-color: #e6bc53;
+        background: linear-gradient(135deg, rgba(230,188,83,0.15) 0%, rgba(230,188,83,0.05) 100%);
+        box-shadow: 0 0 20px rgba(230, 188, 83, 0.4);
+    }
+    .menu-radio:checked + .menu-card-label::after {
+        content: '✔'; position: absolute; top: -10px; right: -10px;
+        background: #e6bc53; color: #8b0000; width: 30px; height: 30px;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    
+    .menu-name { color: #e6bc53; font-size: 20px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
+    .menu-price { color: #fff; font-size: 16px; font-weight: bold; }
+    .menu-badge {
+        position: absolute; top: 15px; right: 15px;
+        background: #8b0000; color: #fff; padding: 4px 12px;
+        border-radius: 20px; font-size: 13px; font-weight: bold;
+    }
+
+    /* 4. DESIGN Ô INPUT VÀ NÚT SUBMIT */
+    .form-group { margin-bottom: 25px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-label { color: #e6bc53; font-weight: bold; font-size: 15px; margin-bottom: 10px; display: block; }
+    
+    .form-control-dark {
+        width: 100%; padding: 14px 15px; background: #222;
+        border: 1px solid #555; border-radius: 8px; color: #fff;
+        font-size: 15px; box-sizing: border-box; transition: 0.3s;
+    }
+    .form-control-dark:focus { outline: none; border-color: #e6bc53; box-shadow: 0 0 10px rgba(230, 188, 83, 0.4); background: #2a2a2a; }
+    .form-control-dark:disabled, .form-control-dark[readonly] { 
+        background: #111; color: #aaa; border-style: dashed; cursor: not-allowed; 
+    }
+    
+    ::-webkit-calendar-picker-indicator { filter: invert(0.8) sepia(1) saturate(5) hue-rotate(5deg); cursor: pointer; }
+
+    .btn-submit-booking {
+        width: 100%; padding: 18px;
+        background: linear-gradient(135deg, #e6bc53 0%, #d4a017 100%);
+        color: #8b0000; border: none; border-radius: 8px;
+        font-size: 18px; font-weight: 900; text-transform: uppercase;
+        cursor: pointer; transition: 0.3s; margin-top: 15px;
+        box-shadow: 0 5px 20px rgba(230, 188, 83, 0.4);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    }
+    .btn-submit-booking:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(230, 188, 83, 0.6); color: #000; }
+
+    /* 5. CSS CHO POPUP (MODAL) TỐI ƯU CÂN ĐỐI LẠI */
+    .custom-modal {
+        display: none; position: fixed; z-index: 9999; left: 0; top: 0;
+        width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(5px); align-items: center; justify-content: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    }
+    .custom-modal-content {
+        background-color: #1a1a1a; border: 2px solid #e6bc53; border-radius: 15px;
+        width: 90%; 
+        /* ĐÃ FIX: Bóp nhỏ khung lại để chữ và ảnh gần nhau hơn */
+        max-width: 600px; 
+        max-height: 85vh; overflow-y: auto;
+        padding: 35px 40px; position: relative; box-shadow: 0 10px 40px rgba(230, 188, 83, 0.3);
+        animation: modalFadeIn 0.3s ease-out;
+    }
+    @@keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .close-modal {
+        color: #aaa; position: absolute; top: 15px; right: 20px;
+        font-size: 30px; font-weight: bold; cursor: pointer; transition: 0.2s;
+    }
+    .close-modal:hover { color: #dc3545; }
+    
+    .btn-xem-chi-tiet {
+        background: none; border: none; color: #aaa; font-size: 13px;
+        margin-top: 15px; text-decoration: underline; cursor: pointer;
+        padding: 0; font-family: inherit; transition: 0.2s;
+    }
+    .btn-xem-chi-tiet:hover { color: #e6bc53; }
+
+    /* BỐ CỤC POPUP MỚI */
+    .modal-body-layout {
+        display: flex;
+        gap: 20px; /* Thu hẹp khoảng cách giữa chữ và ảnh */
+        margin-top: 25px;
+        align-items: center; /* Căn giữa theo chiều dọc */
+    }
+    .modal-list-column {
+        flex: 1;
+    }
+    /* ĐÃ FIX: Thiết kế ảnh bo tròn (avatar) */
+    .modal-image-column {
+        width: 150px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+    }
+    .modal-image-column img {
+        width: 130px; 
+        height: 130px; 
+        object-fit: cover; 
+        border-radius: 50%; /* Bo tròn hoàn toàn */
+        border: 3px solid #e6bc53; 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+        transition: transform 0.3s;
+    }
+    .modal-image-column img:hover { transform: scale(1.08); }
+
+    /* ĐÁP ỨNG ĐIỆN THOẠI */
+    @@media (max-width: 992px) {
+        .booking-container { flex-direction: column; }
+        .booking-left, .booking-right { width: 100%; border-right: none; }
+        .menu-list-container { grid-template-columns: 1fr; }
+        .form-row { grid-template-columns: 1fr; }
+        .modal-body-layout { flex-direction: column; align-items: stretch; }
+        .modal-image-column { width: 100%; flex-direction: row; justify-content: center; }
+    }
+</style>
+
+<div class="booking-wrapper">
+    <div class="booking-container">
+        
+        <form action="/Home/SubmitDatTiec" method="post" style="display: contents;">
+            
+            <div class="booking-left">
+                <h3 class="step-title">1. Chọn Set Menu <span>*</span></h3>
+                
+                <div class="menu-list-container">
+                    @if (ViewBag.DanhSachMenu != null)
+                    {
+                        foreach (var item in ViewBag.DanhSachMenu)
+                        {
+                            int soMon = 0;
+                            if (!string.IsNullOrEmpty(item.DanhSachMonAn))
+                            {
+                                soMon = item.DanhSachMonAn.Split(new[] { ',', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                            }
+
+                            <input type="radio" name="Id_MenuTiec" id="menu_@item.Id_MenuTiec" value="@item.Id_MenuTiec" class="menu-radio" @(ViewBag.SelectedMenuId == item.Id_MenuTiec ? "checked" : "") required>
+                            <label for="menu_@item.Id_MenuTiec" class="menu-card-label">
+                                <div class="menu-name">@item.TenMenu</div>
+                                <div class="menu-price">@item.Gia.ToString("N0") VNĐ / bàn</div>
+                                <span class="menu-badge">@soMon món</span>
+                                
+                                <button type="button" class="btn-xem-chi-tiet" onclick="openModal(@item.Id_MenuTiec)">Xem chi tiết món ăn</button>
+                            </label>
+
+                            <div id="modal_@item.Id_MenuTiec" class="custom-modal">
+                                <div class="custom-modal-content">
+                                    <span class="close-modal" onclick="closeModal(@item.Id_MenuTiec)">&times;</span>
+                                    
+                                    <h2 style="color: #e6bc53; text-transform: uppercase; margin-top:0; border-bottom: 1px dashed #444; padding-bottom: 15px; font-weight: 900;">
+                                        @item.TenMenu
+                                    </h2>
+                                    <p style="color: #fff; font-size: 18px; font-weight: bold; margin-bottom: 0;">
+                                        Giá: @item.Gia.ToString("N0") VNĐ / bàn
+                                    </p>
+                                    
+                                    <div class="modal-body-layout">
+                                        
+                                        <div class="modal-list-column">
+                                            <h4 style="color: #e6bc53; font-size: 18px; margin-top:0; margin-bottom: 15px;">Danh sách các món:</h4>
+                                            <ul style="color: #ddd; line-height: 1.8; padding-left: 22px; font-size: 20px; margin-bottom: 0; list-style-type: decimal;">
+                                                @foreach (var mon in item.DanhSachMonAn.Split(new[] { ',', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                                {
+                                                    <li style="margin-bottom: 10px; font-weight: 500;">@mon.Trim()</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="modal-image-column">
+                                            @if (!string.IsNullOrEmpty(item.HinhAnh1))
+                                            {
+                                                <img src="/images/@item.HinhAnh1" alt="Ảnh minh họa 1" />
+                                            }
+                                            else
+                                            {
+                                                <img src="https://via.placeholder.com/130/333333/e6bc53?text=Anh+1" alt="Ảnh trống" />
+                                            }
+
+                                            @if (!string.IsNullOrEmpty(item.HinhAnh2))
+                                            {
+                                                <img src="/images/@item.HinhAnh2" alt="Ảnh minh họa 2" />
+                                            }
+                                            else
+                                            {
+                                                <img src="https://via.placeholder.com/130/333333/e6bc53?text=Anh+2" alt="Ảnh trống" />
+                                            }
+                                        </div>
+                                    </div> 
+                                    
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div style="color: #dc3545; padding: 20px; border: 1px dashed #dc3545; grid-column: span 2; text-align: center;">
+                            Đang cập nhật danh sách Menu...
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="booking-right">
+                <h3 class="step-title">2. Thông Tin Địa Điểm & Thời Gian</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Tên khách hàng</label>
+                        <input type="text" class="form-control-dark" value="@(ViewBag.KhachHang?.HoTen ?? "")" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="text" class="form-control-dark" value="@(ViewBag.KhachHang?.SoDienThoai ?? "")" readonly>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Số lượng bàn <span>*</span></label>
+                        <input type="number" name="SoLuongBan" class="form-control-dark" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ngày & Giờ đãi tiệc <span>*</span></label>
+                        <input type="datetime-local" name="ThoiGian" class="form-control-dark" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Địa chỉ tổ chức tiệc (Bắt buộc) <span>*</span></label>
+                    <input type="text" name="DiaChi" class="form-control-dark" placeholder="Nhập chính xác địa chỉ nhà, sảnh chung cư..." required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Ghi chú thêm</label>
+                    <textarea name="GhiChu" class="form-control-dark" rows="3" placeholder="Yêu cầu riêng về món ăn, set up sân khấu, dị ứng..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit-booking"><i class="fas fa-paper-plane"></i> XÁC NHẬN ĐẶT TIỆC</button>
+            </div>
+            
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal(id) {
+        document.getElementById('modal_' + id).style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+        document.getElementById('modal_' + id).style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('custom-modal')) {
+            event.target.style.display = "none";
+            document.body.style.overflow = 'auto';
+        }
+    }
+</script>

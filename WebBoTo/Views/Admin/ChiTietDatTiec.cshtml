@@ -1,0 +1,143 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Chi Tiết Đơn Tiệc";
+    var ct = ViewBag.ChiTiet;
+}
+
+<style>
+    .admin-detail-wrapper { max-width: 1000px; margin: 50px auto; min-height: 60vh; padding: 0 20px; font-family: 'Segoe UI', sans-serif; }
+    
+    .admin-detail-card {
+        background: #1c1c1c; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border: 1px solid #333; overflow: hidden;
+    }
+
+    .detail-header { background: #8B0000; padding: 25px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #d4af37; }
+    .detail-header h2 { margin: 0; color: #fff; font-size: 22px; text-transform: uppercase; font-weight: 700; }
+    .order-id-badge { background: #d4af37; color: #111; padding: 5px 15px; border-radius: 5px; font-weight: bold; font-size: 18px; letter-spacing: 1px; }
+
+    .detail-body { padding: 40px; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    
+    .info-section h4 { color: #d4af37; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; font-size: 18px; text-transform: uppercase; }
+    
+    .info-row { margin-bottom: 15px; display: flex; flex-direction: column; }
+    .info-label { color: #888; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 5px; }
+    .info-value { color: #eee; font-size: 16px; font-weight: 500; }
+    
+    .highlight-text { color: #00ff88; font-weight: bold; font-size: 18px; }
+    .highlight-date { color: #ff4d4d; font-weight: bold; }
+
+    .menu-box { background: rgba(255, 255, 255, 0.03); border: 1px solid #333; border-radius: 10px; padding: 20px; margin-top: 10px; }
+    .dish-list { color: #bbb; line-height: 1.8; font-size: 15px; margin-top: 10px; padding-left: 15px; border-left: 2px solid #555; }
+
+    /* STYLE CHO BẢNG TÍNH TIỀN CÓ FORM NHẬP */
+    .total-box { background: rgba(0,0,0,0.3); border: 1px solid #444; border-radius: 10px; padding: 20px; margin-top: 30px; }
+    .calc-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .calc-label { color: #ccc; font-size: 15px; font-weight: bold; text-transform: uppercase; }
+    .calc-value { color: #fff; font-size: 18px; font-weight: bold; }
+    
+    .deposit-input { background: #111; border: 1px solid #d4af37; color: #d4af37; padding: 8px 12px; border-radius: 5px; text-align: right; font-weight: bold; width: 140px; outline: none; }
+    .deposit-input:focus { box-shadow: 0 0 8px rgba(212, 175, 55, 0.5); }
+    .btn-save-deposit { background: #d4af37; color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+    .btn-save-deposit:hover { background: #fff; }
+
+    .final-row { border-top: 1px dashed #555; padding-top: 15px; margin-top: 15px; }
+    .final-label { color: #fff; font-size: 18px; font-weight: bold; }
+    .final-value { color: #00ff88; font-size: 26px; font-weight: 900; }
+
+    /* Nút hành động */
+    .detail-footer { background: #151515; padding: 25px 40px; display: flex; justify-content: flex-end; gap: 15px; border-top: 1px solid #333; }
+    .btn-action { padding: 10px 25px; border-radius: 50px; font-weight: bold; font-size: 14px; text-transform: uppercase; border: none; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .btn-approve { background: #28a745; color: #fff; }
+    .btn-approve:hover:not(:disabled) { background: #218838; transform: translateY(-2px); }
+    .btn-reject { background: #dc3545; color: #fff; }
+    .btn-reject:hover:not(:disabled) { background: #c82333; transform: translateY(-2px); }
+    .btn-back { background: transparent; color: #aaa; border: 1px solid #555; }
+    .btn-back:hover { background: #333; color: #fff; }
+    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .current-status { display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 13px; font-weight: bold; margin-bottom: 20px; }
+</style>
+
+<div class="admin-detail-wrapper">
+    <div class="admin-detail-card">
+        
+        <div class="detail-header">
+            <h2><i class="fas fa-file-invoice"></i> Hồ Sơ Đặt Tiệc</h2>
+            <div class="order-id-badge">#T@(ct.Id_DatTiec)</div>
+        </div>
+
+        <div class="detail-body">
+            <div>
+                <span class="info-label" style="display:inline-block; margin-right: 10px;">Trạng thái đơn:</span>
+                @if (ct.STrangThai == 0) { <span class="current-status" style="background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid #ffc107;">Đang chờ duyệt</span> }
+                else if (ct.STrangThai == 1) { <span class="current-status" style="background: rgba(40, 167, 69, 0.2); color: #00ff88; border: 1px solid #00ff88;">Đã duyệt thành công</span> }
+                else { <span class="current-status" style="background: rgba(220, 53, 69, 0.2); color: #ff4d4d; border: 1px solid #ff4d4d;">Đã bị hủy</span> }
+            </div>
+
+            <div class="info-grid">
+                <!-- THÔNG TIN KHÁCH HÀNG -->
+                <div class="info-section">
+                    <h4><i class="fas fa-user-tie me-2"></i> Thông Tin Khách</h4>
+                    <div class="info-row"><span class="info-label">Họ và tên</span><span class="info-value">@ct.HoTen</span></div>
+                    <div class="info-row"><span class="info-label">Số điện thoại</span><span class="info-value"><i class="fas fa-phone-alt me-1" style="color:#d4af37;"></i> @ct.SoDienThoai</span></div>
+                    <div class="info-row"><span class="info-label">Địa chỉ tổ chức</span><span class="info-value">@ct.DiaChi</span></div>
+                    <div class="info-row"><span class="info-label">Ngày giờ đãi tiệc</span><span class="info-value highlight-date"><i class="fas fa-calendar-alt me-1"></i> @ct.ThoiGian.ToString("dd/MM/yyyy - HH:mm")</span></div>
+                    <div class="info-row"><span class="info-label">Ghi chú</span><span class="info-value" style="font-style: italic; color: #d4af37;">@(string.IsNullOrEmpty(ct.GhiChu) ? "Không có yêu cầu." : ct.GhiChu)</span></div>
+                </div>
+
+                <!-- THÔNG TIN MENU & TÍNH TIỀN -->
+                <div class="info-section">
+                    <h4><i class="fas fa-utensils me-2"></i> Chi Tiết Dịch Vụ</h4>
+                    <div class="menu-box">
+                        <div class="info-row"><span class="info-label">Set Menu</span><span class="info-value highlight-text">@ct.TenMenu</span></div>
+                        <div class="info-row"><span class="info-label">Quy mô</span><span class="info-value" style="font-size: 18px;">@ct.SoLuongBan <span style="font-size:14px; color:#888;">bàn</span></span></div>
+                    </div>
+
+                    <!-- BẢNG TÍNH TIỀN CỌC CHO ADMIN -->
+                    <div class="total-box">
+                        <div class="calc-row">
+                            <span class="calc-label">Tổng Chi Phí:</span>
+                            <span class="calc-value">@ct.TongTien.ToString("N0") đ</span>
+                        </div>
+                        
+                        <div class="calc-row">
+                            <span class="calc-label" style="color:#d4af37;">Tiền Khách Cọc:</span>
+                            
+                            <!-- FORM NHẬP TIỀN CỌC CHUẨN XÁC -->
+                            <form action="/Admin/CapNhatTienCoc" method="post" style="display:flex; gap:10px; margin:0;">
+                                <input type="hidden" name="id" value="@ct.Id_DatTiec" />
+                                <input type="number" name="tienCocTiec" value="@ct.TienCocTiec" class="deposit-input" placeholder="0" />
+                                <button type="submit" class="btn-save-deposit" title="Lưu Tiền Cọc"><i class="fas fa-save"></i> LƯU</button>
+                            </form>
+                            
+                        </div>
+
+                        <div class="calc-row final-row">
+                            <span class="final-label">Còn Lại:</span>
+                            <span class="final-value">@((ct.TongTien - ct.TienCocTiec).ToString("N0")) đ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-footer">
+            <a href="/Admin/QuanLyDatTiec" class="btn-action btn-back"><i class="fas fa-arrow-left"></i> Quay Lại</a>
+            
+            <form action="/Admin/CapNhatTrangThaiTiec" method="post" style="margin: 0;">
+                <input type="hidden" name="id" value="@ct.Id_DatTiec" />
+                <input type="hidden" name="trangThaiMoi" value="2" />
+                <button type="submit" class="btn-action btn-reject" @(ct.STrangThai == 2 ? "disabled" : "")><i class="fas fa-times-circle"></i> Từ Chối</button>
+            </form>
+
+            <form action="/Admin/CapNhatTrangThaiTiec" method="post" style="margin: 0;">
+                <input type="hidden" name="id" value="@ct.Id_DatTiec" />
+                <input type="hidden" name="trangThaiMoi" value="1" />
+                <button type="submit" class="btn-action btn-approve" @(ct.STrangThai == 1 ? "disabled" : "")><i class="fas fa-check-circle"></i> Duyệt Đơn</button>
+            </form>
+        </div>
+
+    </div>
+</div>

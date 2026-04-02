@@ -1,0 +1,317 @@
+﻿@{
+    ViewData["Title"] = "Tin Tức & Đánh Giá";
+    var thongBaos = ViewBag.ThongBaos as List<WebBoTo.Models.ThongBao>;
+    var danhGias = ViewBag.DanhGias as List<WebBoTo.Models.DanhGia>;
+    var danhGiaNoiBats = ViewBag.DanhGiaNoiBats as List<WebBoTo.Models.DanhGia>;
+    string MaskName(string? name) 
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "Ẩn danh";
+        name = name.Trim();
+        
+        // Nếu tên quá ngắn (chỉ 1-2 chữ cái) thì chỉ hiện chữ đầu kèm dấu *
+        if (name.Length <= 2) return name.Substring(0, 1) + "***";
+        
+        // Trả về: Chữ cái đầu + n dấu * + Chữ cái cuối
+        return name[0] + new string('*', name.Length - 2) + name[name.Length - 1];
+    }
+}
+
+<style>
+    /* --- BỘ CSS CHUẨN --- */
+    :root { --bg-dark: #121212; --bg-card: #1e1e1e; --gold: #e6bc53; --text-light: #f4f6f9; --text-muted: #aaa; }
+    body { background-color: var(--bg-dark); color: var(--text-light); font-family: sans-serif; }
+    .news-container { max-width: 1200px; margin: 40px auto; padding: 20px; }
+    .section-title { color: var(--gold); text-transform: uppercase; font-size: 24px; margin-bottom: 20px; border-bottom: 2px dashed var(--gold); padding-bottom: 10px; }
+
+    /* CUỘN TỪ TRÁI SANG PHẢI VÔ HẠN (KHÔNG CÓ KHOẢNG TRỐNG) */
+    .marquee-wrapper { 
+        overflow: hidden; 
+        background: #1a1a1a; 
+        padding: 15px 0; 
+        border: 1px solid #333; 
+        border-radius: 8px; 
+        margin-bottom: 40px; 
+        display: flex; /* Dùng flex để xếp hàng ngang chuẩn xác */
+        width: 100%;
+    }
+    
+    .marquee-track { 
+        display: flex; 
+        width: max-content; /* Tự động giãn chiều rộng theo số lượng thẻ */
+        animation: scroll-ltr 20s linear infinite; /* Chạy đều 20s, lặp vô hạn */
+    }
+    
+    .marquee-wrapper:hover .marquee-track { animation-play-state: paused; }
+    
+    /* Thuật toán vô hạn: Bắt đầu từ nửa sau (-50%), trôi về nửa đầu (0%). 
+       Vì 2 nửa giống hệt nhau nên khi giật lại -50% sẽ không ai nhận ra. */
+    @@keyframes scroll-ltr { 
+        0% { transform: translateX(-50%); } 
+        100% { transform: translateX(0%); } 
+    }
+
+    .featured-card { 
+        width: 320px; 
+        flex-shrink: 0; /* Chống bị bóp méo thẻ khi màn hình nhỏ */
+        background: var(--bg-card); 
+        border-left: 3px solid var(--gold); 
+        border-radius: 4px; 
+        padding: 12px 15px; 
+        margin: 0 10px; 
+        white-space: normal; 
+    }
+    .featured-card h4 { margin: 0 0 5px 0; color: var(--gold); font-size: 15px; display: flex; justify-content: space-between;}
+    .featured-card .stars { color: #ffc107; font-size: 12px; }
+    .featured-card p { font-size: 13.5px; color: #ddd; margin: 5px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .featured-time { font-size: 11px; color: #888; font-style: italic; }
+
+    /* BỐ CỤC CHÍNH */
+    .main-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
+
+    /* CỘT TRÁI (THÔNG BÁO) */
+    .admin-posts { background: var(--bg-card); padding: 20px; border-radius: 10px; border-top: 4px solid #dc3545; }
+    .admin-post-item { border-bottom: 1px dashed #444; padding-bottom: 15px; margin-bottom: 15px; }
+    .admin-post-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .admin-name { color: #dc3545; font-weight: bold; font-size: 16px; margin-right: 8px; }
+    .post-time { color: var(--text-muted); font-size: 12px; font-style: italic; }
+    .post-content { font-size: 14px; margin-top: 8px; line-height: 1.5; color: #eee; }
+
+    /* CỘT PHẢI (ĐÁNH GIÁ) */
+    .review-item { background: var(--bg-card); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; position: relative; }
+    .reviewer-name { font-weight: bold; color: var(--gold); font-size: 16px; }
+    .review-stars { color: #ffc107; font-size: 14px; margin-left: 10px; }
+    .review-images { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+    .review-images img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; border: 1px solid #555; }
+    
+    .admin-reply { background: rgba(220, 53, 69, 0.1); border-left: 3px solid #dc3545; padding: 12px 15px; margin-top: 15px; border-radius: 0 5px 5px 0; }
+    .btn-feature { position: absolute; top: 15px; right: 15px; color: #555; font-size: 18px; text-decoration: none; }
+    .btn-feature.active { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+
+    /* FORM REVIEW */
+    .write-review-box { background: var(--bg-card); padding: 20px; border-radius: 10px; margin-bottom: 30px; border: 1px dashed var(--gold); }
+    .form-control { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #444; background: #222; color: #fff; margin-bottom: 15px; }
+    .rating-input { display: flex; flex-direction: row-reverse; justify-content: flex-start; gap: 5px; margin-bottom: 15px; }
+    .rating-input input { display: none; }
+    .rating-input label { font-size: 25px; color: #555; cursor: pointer; }
+    .rating-input input:checked ~ label, .rating-input label:hover, .rating-input label:hover ~ label { color: #ffc107; }
+    .btn-submit { background: var(--gold); color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+
+    /* BỘ CSS LỌC VÀ PHÂN TRANG */
+    .review-toolbar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+    .filter-select { background: #222; color: #fff; border: 1px solid var(--gold); padding: 8px 15px; border-radius: 5px; outline: none; cursor: pointer; }
+    
+    .pagination-container { display: flex; justify-content: center; gap: 8px; margin-top: 30px; }
+    .page-btn { padding: 6px 14px; background-color: #222; color: var(--gold); border: 1px solid #444; border-radius: 4px; text-decoration: none; font-weight: bold; transition: 0.2s; }
+    .page-btn:hover { background-color: #333; border-color: var(--gold); }
+    .page-btn.active { background-color: var(--gold); color: #000; border-color: var(--gold); }
+</style>
+
+<div class="news-container">
+    
+    @if (danhGiaNoiBats != null && danhGiaNoiBats.Any())
+    {
+        <h2 class="section-title"><i class="fas fa-star" style="color:var(--gold)"></i> Đánh Giá Nổi Bật</h2>
+        <div class="marquee-wrapper">
+            <div class="marquee-track">
+                
+                @foreach (var nb in danhGiaNoiBats)
+                {
+                    <div class="featured-card">
+                        <h4>@MaskName(nb.TaiKhoan?.HoTen) <span class="stars">@for(int i=0; i<nb.SoSao; i++){<text>★</text>}</span></h4>
+                        <div class="featured-time">@nb.NgayTao.ToString("dd/MM/yyyy - HH:mm")</div>
+                        <p>"@nb.BinhLuan"</p>
+                    </div>
+                }
+                @foreach (var nb in danhGiaNoiBats)
+                {
+                    <div class="featured-card">
+                        <h4>@MaskName(nb.TaiKhoan?.HoTen) <span class="stars">@for(int i=0; i<nb.SoSao; i++){<text>★</text>}</span></h4>
+                        <div class="featured-time">@nb.NgayTao.ToString("dd/MM/yyyy - HH:mm")</div>
+                        <p>"@nb.BinhLuan"</p>
+                    </div>
+                }
+
+                @foreach (var nb in danhGiaNoiBats)
+                {
+                    <div class="featured-card">
+                        <h4>@MaskName(nb.TaiKhoan?.HoTen) <span class="stars">@for(int i=0; i<nb.SoSao; i++){<text>★</text>}</span></h4>
+                        <div class="featured-time">@nb.NgayTao.ToString("dd/MM/yyyy - HH:mm")</div>
+                        <p>"@nb.BinhLuan"</p>
+                    </div>
+                }
+                @foreach (var nb in danhGiaNoiBats)
+                {
+                    <div class="featured-card">
+                        <h4>@MaskName(nb.TaiKhoan?.HoTen) <span class="stars">@for(int i=0; i<nb.SoSao; i++){<text>★</text>}</span></h4>
+                        <div class="featured-time">@nb.NgayTao.ToString("dd/MM/yyyy - HH:mm")</div>
+                        <p>"@nb.BinhLuan"</p>
+                    </div>
+                }
+
+            </div>
+        </div>
+    }    
+    <div class="main-grid">
+        <div>
+            <h2 class="section-title"><i class="fas fa-bullhorn"></i> Thông Báo Từ Quán</h2>
+            
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+            {
+                <div style="margin-bottom: 20px; background: #222; padding: 15px; border-radius: 8px; border: 1px solid #dc3545;">
+                    <form action="/Home/CreateThongBao" method="post">
+                        <textarea name="noiDung" class="form-control" rows="2" placeholder="Nhập nội dung thông báo mới..." required></textarea>
+                        <button type="submit" class="btn-submit" style="background: #dc3545; color: white; width: 100%;"><i class="fas fa-paper-plane"></i> Đăng Thông Báo</button>
+                    </form>
+                </div>
+            }
+
+            <div class="admin-posts">
+                @if (thongBaos != null && thongBaos.Any())
+                {
+                    foreach (var tb in thongBaos)
+                    {
+                        <div class="admin-post-item">
+                            <div>
+                                <span class="admin-name"><i class="fas fa-user-shield"></i> @tb.TaiKhoan?.HoTen</span>
+                                <span class="post-time">@tb.NgayTao.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                            <div class="post-content">@tb.NoiDung</div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="color: #888; text-align: center;">Hiện chưa có thông báo nào.</p>
+                }
+            </div>
+        </div>
+
+        <div class="reviews-section">
+            <h2 class="section-title"><i class="fas fa-comments"></i> Đánh Giá Khách Hàng</h2>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="write-review-box">
+                    <h4 style="margin-top: 0; color: var(--gold);">Viết đánh giá của bạn</h4>
+                    <form action="/Home/PostReview" method="post" enctype="multipart/form-data" onsubmit="this.querySelector('button[type=submit]').disabled=true; this.querySelector('button[type=submit]').innerHTML='Đang gửi...';">
+                        <div class="rating-input">
+                            <input type="radio" id="star5" name="rating" value="5" checked /><label for="star5">★</label>
+                            <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>
+                            <input type="radio" id="star3" name="rating" value="3" /><label for="star3">★</label>
+                            <input type="radio" id="star2" name="rating" value="2" /><label for="star2">★</label>
+                            <input type="radio" id="star1" name="rating" value="1" /><label for="star1">★</label>
+                        </div>
+                        <textarea name="comment" class="form-control" rows="3" placeholder="Chia sẻ trải nghiệm..." required></textarea>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <span style="color: #aaa; font-size: 13px; display: block; margin-bottom: 5px;">Kéo thả hoặc chọn tối đa 10 ảnh</span>
+                            <input type="file" name="images" accept="image/*" multiple style="color: #fff;"/>
+                        </div>
+                        <button type="submit" class="btn-submit">Gửi Đánh Giá</button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <div class="write-review-box" style="text-align: center;">
+                    <p style="color: #aaa;">Đăng nhập để chia sẻ trải nghiệm và hình ảnh của bạn!</p>
+                    <a href="/Account/Login" class="btn-submit" style="text-decoration: none; display: inline-block;">Đăng nhập ngay</a>
+                </div>
+            }
+
+            <div class="review-toolbar">
+                <h3 style="margin: 0; color: #fff; font-size: 18px;">Tất cả đánh giá</h3>
+                <form action="/Home/TinTuc" method="get" style="display: flex; align-items: center; gap: 10px;">
+                    <label style="color: #aaa; font-size: 14px;"><i class="fas fa-filter"></i> Sắp xếp:</label>
+                    <select name="sortOrder" onchange="this.form.submit()" class="filter-select">
+                        <option value="" selected="@(string.IsNullOrEmpty(ViewBag.CurrentSort) ? "selected" : null)">Mới nhất</option>
+                        <option value="sao_giam" selected="@(ViewBag.CurrentSort == "sao_giam" ? "selected" : null)">Đánh giá cao -> thấp</option>
+                        <option value="sao_tang" selected="@(ViewBag.CurrentSort == "sao_tang" ? "selected" : null)">Đánh giá thấp -> cao</option>
+                    </select>
+                </form>
+            </div>
+
+            @if (danhGias != null && danhGias.Any())
+            {
+                foreach (var dg in danhGias)
+                {
+                    <div class="review-item">
+                        @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                        {
+                            <a href="/Home/ToggleNoiBat/@dg.Id_DanhGia" class="btn-feature @(dg.IsNoiBat ? "active" : "")" title="Đánh dấu nổi bật">
+                                <i class="@(dg.IsNoiBat ? "fas fa-star" : "far fa-star")"></i>
+                            </a>
+                        }
+
+                        <span class="reviewer-name">@MaskName(dg.TaiKhoan?.HoTen)</span>
+                        <span class="review-stars">
+                            @for(int i=0; i<dg.SoSao; i++){ <i class="fas fa-star"></i> }
+                        </span>
+                        <div class="post-time">@dg.NgayTao.ToString("dd/MM/yyyy - HH:mm")</div>
+                        
+                        <div class="post-content">@dg.BinhLuan</div>
+
+                        @if (dg.HinhAnhDanhGias != null && dg.HinhAnhDanhGias.Any())
+                        {
+                            <div class="review-images">
+                                @foreach (var anh in dg.HinhAnhDanhGias)
+                                {
+                                    <img src="/images/@anh.DuongDan" alt="Ảnh đánh giá">
+                                }
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(dg.AdminReply))
+                        {
+                            <div class="admin-reply">
+                                <strong><i class="fas fa-reply"></i> Bò Tơ Chính Cư phản hồi:</strong>
+                                <p>@dg.AdminReply</p>
+                            </div>
+                        }
+                        
+                        @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                        {
+                            <button onclick="document.getElementById('reply-form-@dg.Id_DanhGia').style.display='block'" style="background: none; border: none; color: #28a745; font-size: 13px; font-weight: bold; cursor: pointer; margin-top: 15px; padding: 0;">
+                                <i class="fas fa-reply"></i> @(!string.IsNullOrEmpty(dg.AdminReply) ? "Sửa phản hồi" : "Trả lời khách")
+                            </button>
+                            
+                            <form id="reply-form-@dg.Id_DanhGia" action="/Home/ReplyDanhGia" method="post" style="display: none; margin-top: 10px;">
+                                <input type="hidden" name="id" value="@dg.Id_DanhGia" />
+                                <textarea name="adminReply" class="form-control" rows="2" placeholder="Nhập phản hồi của quán..." required style="margin-bottom: 10px;">@dg.AdminReply</textarea>
+                                
+                                <div>
+                                    <button type="submit" class="btn-submit" style="padding: 6px 15px; font-size: 13px; background: #28a745; color: #fff;">Gửi phản hồi</button>
+                                    <button type="button" class="btn-submit" style="padding: 6px 15px; font-size: 13px; background: #666; color: #fff;" onclick="document.getElementById('reply-form-@dg.Id_DanhGia').style.display='none'">Hủy</button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                }
+
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <div class="pagination-container">
+                        @if (ViewBag.CurrentPage > 1)
+                        {
+                            <a href="/Home/TinTuc?sortOrder=@ViewBag.CurrentSort&page=@(ViewBag.CurrentPage - 1)" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+                        }
+
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <a href="/Home/TinTuc?sortOrder=@ViewBag.CurrentSort&page=@i" class="page-btn @(i == ViewBag.CurrentPage ? "active" : "")">@i</a>
+                        }
+
+                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                        {
+                            <a href="/Home/TinTuc?sortOrder=@ViewBag.CurrentSort&page=@(ViewBag.CurrentPage + 1)" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p style="color: #888; text-align: center;">Hiện chưa có đánh giá nào.</p>
+            }
+        </div>
+    </div>
+</div>

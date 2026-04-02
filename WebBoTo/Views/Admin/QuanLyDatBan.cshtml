@@ -1,0 +1,146 @@
+﻿@model IEnumerable<WebBoTo.Models.DatBan>
+@{
+    ViewData["Title"] = "Quản Lý Đặt Bàn";
+    Layout = null;
+    var taiKhoans = ViewBag.TaiKhoans as Dictionary<int, WebBoTo.Models.TaiKhoan>;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Đặt Bàn - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background-color: #f4f6f9; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: #8B0000; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+        
+        /* CSS cho Thanh công cụ (Tìm kiếm & Nút Back) */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; margin-top: 15px; }
+        .search-form { display: flex; gap: 10px; }
+        .search-input { padding: 8px 15px; border: 1px solid #ccc; border-radius: 4px; width: 280px; outline: none; font-size: 14px; }
+        .search-input:focus { border-color: #007bff; box-shadow: 0 0 5px rgba(0,123,255,0.3); }
+        .btn-search { background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-search:hover { background-color: #0056b3; }
+        .btn-clear { background-color: #6c757d; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #343a40; color: #fff; }
+        tr:hover { background-color: #f1f1f1; }
+        
+        .badge { padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 13px; color: #fff; }
+        .badge-pending { background: #ffc107; color: #000; }
+        .badge-approved { background: #28a745; }
+        .badge-completed { background: #17a2b8; }
+        .badge-cancelled { background: #dc3545; }
+        
+        .btn-view { background: #007bff; color: #fff; padding: 8px 15px; text-decoration: none; border-radius: 4px; font-size: 14px; }
+        .btn-view:hover { background: #0056b3; }
+
+        /* CSS cho Phân trang */
+        .pagination-container { display: flex; justify-content: center; gap: 8px; margin-top: 25px; }
+        .page-btn { padding: 8px 14px; background-color: #fff; color: #007bff; border: 1px solid #dee2e6; border-radius: 4px; text-decoration: none; font-weight: bold; transition: 0.2s; }
+        .page-btn:hover { background-color: #e9ecef; }
+        .page-btn.active { background-color: #007bff; color: #fff; border-color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-clipboard-list"></i> Danh sách Đơn Đặt Bàn</h2>
+        
+        <div class="toolbar">
+            <a href="/" style="color: #007bff; text-decoration:none; font-weight: bold;"><i class="fas fa-arrow-left"></i> Về Trang Chủ</a>
+            
+            <form action="/Admin/QuanLyDatBan" method="get" class="search-form">
+                <input type="text" name="searchString" class="search-input" placeholder="Nhập tên hoặc số ĐT để tìm..." value="@ViewBag.SearchString" />
+                <button type="submit" class="btn-search"><i class="fas fa-search"></i> Tìm kiếm</button>
+                @if (!string.IsNullOrEmpty(ViewBag.SearchString))
+                {
+                    <a href="/Admin/QuanLyDatBan" class="btn-clear"><i class="fas fa-times"></i> Hủy lọc</a>
+                }
+            </form>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã Đơn</th>
+                    <th>Khách Hàng</th>
+                    <th>Số ĐT</th>
+                    <th>Thời Gian Đến</th>
+                    <th>Số Người</th>
+                    <th>Tiền Cọc</th>
+                    <th>Trạng Thái</th>
+                    <th>Người Duyệt</th>
+                    <th>Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="9" style="text-align: center; color: #888; padding: 30px;">
+                            @if (!string.IsNullOrEmpty(ViewBag.SearchString))
+                            {
+                                <span>Không tìm thấy đơn đặt bàn nào khớp với từ khóa "@ViewBag.SearchString".</span>
+                            }
+                            else
+                            {
+                                <span>Hiện chưa có đơn đặt bàn nào trong hệ thống.</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        var kh = taiKhoans != null && taiKhoans.ContainsKey(item.Id_TK) ? taiKhoans[item.Id_TK] : null;
+                        <tr>
+                            <td style="font-weight: bold;">#@item.Id_DatBan</td>
+                            <td>@(kh?.HoTen ?? "Khách ẩn danh")</td>
+                            <td>@(kh?.SoDienThoai ?? "N/A")</td>
+                            <td style="color: #8B0000; font-weight: bold;">@item.GioDat.ToString(@"hh\:mm") - @item.NgayDat.ToString("dd/MM/yyyy")</td>
+                            <td>@item.SoLuongNguoi</td>
+                            <td style="color: #28a745; font-weight: bold;">@item.TienCoc.ToString("N0") đ</td>
+                            <td>
+                                @if (item.TrangThai == 0) { <span class="badge badge-pending">Chờ xác nhận</span> }
+                                else if (item.TrangThai == 1) { <span class="badge badge-approved">Đã duyệt</span> }
+                                else if (item.TrangThai == 2) { <span class="badge badge-completed">Hoàn thành</span> }
+                                else { <span class="badge badge-cancelled">Đã hủy</span> }
+                            </td>
+                            <td style="color: #666; font-size: 13px;">
+                                @(!string.IsNullOrEmpty(item.TenNhanVienDuyet) ? item.TenNhanVienDuyet : "Chưa có")
+                            </td>
+                            <td>
+                                <a href="/Admin/ChiTietDatBan/@item.Id_DatBan" class="btn-view"><i class="fas fa-eye"></i> Chi tiết & Duyệt</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="pagination-container">
+                @if (ViewBag.CurrentPage > 1)
+                {
+                    <a href="/Admin/QuanLyDatBan?searchString=@ViewBag.SearchString&page=@(ViewBag.CurrentPage - 1)" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+                }
+
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <a href="/Admin/QuanLyDatBan?searchString=@ViewBag.SearchString&page=@i" class="page-btn @(i == ViewBag.CurrentPage ? "active" : "")">@i</a>
+                }
+
+                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                {
+                    <a href="/Admin/QuanLyDatBan?searchString=@ViewBag.SearchString&page=@(ViewBag.CurrentPage + 1)" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+                }
+            </div>
+        }
+    </div>
+</body>
+</html>

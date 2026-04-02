@@ -1,0 +1,120 @@
+﻿@{
+    ViewData["Title"] = "Lịch Sử Đặt Tiệc";
+    var lichSu = ViewBag.LichSuTiec;
+}
+
+<style>
+    .history-wrapper { max-width: 1200px; margin: 50px auto; min-height: 60vh; padding: 0 20px; font-family: 'Segoe UI', sans-serif; }
+    .history-card { background: #1c1c1c; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 30px 40px; border: 1px solid #333; }
+    .history-title { color: #d4af37; text-transform: uppercase; border-bottom: 2px solid #8B0000; padding-bottom: 15px; margin-top: 0; margin-bottom: 30px; font-weight: 700; font-size: 24px; letter-spacing: 1px; }
+
+    .alert-custom { background: rgba(40, 167, 69, 0.1); border: 1px solid rgba(40, 167, 69, 0.5); color: #00ff88; border-radius: 8px; padding: 15px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+    
+    .custom-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; }
+    .custom-table th { background: #8B0000; color: #fff; padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; text-align: left; }
+    .custom-table th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .custom-table th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+    
+    .custom-table td { padding: 18px 15px; border-bottom: 1px dashed #444; color: #ccc; vertical-align: middle; font-size: 15px; }
+    .custom-table tbody tr { transition: all 0.3s ease; }
+    .custom-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
+    .custom-table tbody tr:last-child td { border-bottom: none; }
+
+    .text-gold { color: #d4af37 !important; font-weight: bold; }
+    .order-id { color: #888; font-family: monospace; font-size: 16px; font-weight: bold; }
+    
+    .status-badge { padding: 6px 12px; border-radius: 30px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+    .status-pending { background: rgba(255, 193, 7, 0.1); color: #ffc107; border: 1px solid #ffc107; }
+    .status-approved { background: rgba(40, 167, 69, 0.1); color: #00ff88; border: 1px solid #00ff88; }
+    .status-cancelled { background: rgba(220, 53, 69, 0.1); color: #ff4d4d; border: 1px solid #ff4d4d; }
+
+    .btn-view-detail { background: transparent; border: 1px solid #d4af37; color: #d4af37; padding: 8px 16px; border-radius: 5px; text-decoration: none; font-size: 13px; transition: 0.3s; display: inline-block; white-space: nowrap; }
+    .btn-view-detail:hover { background: #d4af37; color: #111; font-weight: bold; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+    
+    /* Box hiển thị chi phí cực kỳ chi tiết */
+    .finance-box { display: flex; flex-direction: column; gap: 4px; }
+    .finance-row { display: flex; justify-content: space-between; font-size: 13px; width: 150px; }
+    .finance-label { color: #888; }
+    .finance-val { font-weight: bold; text-align: right; }
+    .finance-total { color: #ccc; }
+    .finance-deposit { color: #d4af37; }
+    .finance-remain { color: #00ff88; font-size: 14px; border-top: 1px dashed #555; padding-top: 4px; margin-top: 2px; }
+</style>
+
+<div class="history-wrapper">
+    <div class="history-card">
+        <h2 class="history-title"><i class="fas fa-history me-2"></i> Lịch sử đặt tiệc tại gia</h2>
+        
+        @if (TempData["ThongBaoTiec"] != null)
+        {
+            <div class="alert alert-custom alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle" style="font-size: 20px;"></i>
+                <strong>@TempData["ThongBaoTiec"]</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (lichSu != null && lichSu.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Mã Đơn</th>
+                            <th>Tên Set Menu</th>
+                            <th>Quy Mô</th>
+                            <th>Ngày Tổ Chức</th>
+                            <th>Chi Phí (VNĐ)</th>
+                            <th style="text-align: center;">Trạng Thái</th>
+                            <th style="text-align: center;">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in lichSu)
+                        {
+                            <tr>
+                                <td class="order-id">#T@(item.Id_DatTiec)</td>
+                                <td class="text-gold">@item.TenMenu</td>
+                                <td>@item.SoLuongBan <span style="font-size:12px; color:#888;">bàn</span></td>
+                                <td>@item.ThoiGian.ToString("dd/MM/yyyy") <br/> <small style="color:#d4af37;">@item.ThoiGian.ToString("HH:mm")</small></td>
+                                
+                                <td>
+                                    <div class="finance-box">
+                                        <div class="finance-row finance-total">
+                                            <span class="finance-label">Tổng:</span>
+                                            <span class="finance-val">@item.TongTien.ToString("N0")</span>
+                                        </div>
+                                        <div class="finance-row finance-deposit">
+                                            <span class="finance-label">Đã cọc:</span>
+                                            <span class="finance-val">- @item.TienCocTiec.ToString("N0")</span>
+                                        </div>
+                                        <div class="finance-row finance-remain">
+                                            <span class="finance-label" style="color:#fff;">Còn lại:</span>
+                                            <span class="finance-val">@((item.TongTien - item.TienCocTiec).ToString("N0"))</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td style="text-align: center;">
+                                    @if (item.STrangThai == 0) { <span class="status-badge status-pending"><i class="fas fa-clock"></i> Chờ duyệt</span> }
+                                    else if (item.STrangThai == 1) { <span class="status-badge status-approved"><i class="fas fa-check"></i> Đã xác nhận</span> }
+                                    else { <span class="status-badge status-cancelled"><i class="fas fa-times"></i> Đã hủy</span> }
+                                </td>
+                                <td style="text-align: center;">
+                                    <a href="/Home/ChiTietLichSuTiec/@item.Id_DatTiec" class="btn-view-detail">Xem chi tiết</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div style="color: #888; font-style: italic; text-align: center; padding: 40px 0; font-size: 16px;">
+                <i class="fas fa-box-open" style="font-size: 40px; color: #444; margin-bottom: 15px; display: block;"></i>
+                Bạn chưa có đơn đặt tiệc nào. Hãy đặt ngay một bữa tiệc để trải nghiệm dịch vụ của chúng tôi!
+            </div>
+        }
+    </div>
+</div>

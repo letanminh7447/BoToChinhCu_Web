@@ -1,0 +1,66 @@
+﻿@model IEnumerable<WebBoTo.Models.MenuTiec>
+@{
+    ViewData["Title"] = "Quản Lý Menu Tiệc";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Menu Tiệc - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background-color: #f4f6f9; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: #8B0000; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: middle; }
+        th { background: #343a40; color: #fff; }
+        .btn { padding: 6px 12px; border-radius: 4px; text-decoration: none; color: #fff; font-size: 13px; font-weight: bold; margin-right: 5px; }
+        .btn-add { background: #28a745; margin-bottom: 15px; display: inline-block; padding: 10px 15px; }
+        .btn-info { background: #17a2b8; }
+        .btn-warning { background: #ffc107; color: #000; }
+        .btn-danger { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-glass-cheers"></i> Quản Lý Danh Sách Menu Tiệc</h2>
+        <a href="/" style="display:inline-block; margin-bottom: 15px; color: #007bff; text-decoration:none;"><i class="fas fa-arrow-left"></i> Về Trang Chủ</a>
+        <br />
+        
+        <a href="/Admin/CreateMenuTiec" class="btn btn-add"><i class="fas fa-plus"></i> Thêm Menu Tiệc Mới</a>
+
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Tên Menu Tiệc</th>
+                <th>Giá Thành</th>
+                <th>Số lượng món</th>
+                <th>Hành Động</th>
+            </tr>
+            @foreach (var item in Model)
+            {
+                // Đếm số dòng (số món) dựa vào dấu xuống dòng
+                int soMon = string.IsNullOrEmpty(item.DanhSachMonAn) ? 0 : item.DanhSachMonAn.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                <tr>
+                    <td>@item.Id_MenuTiec</td>
+                    <td style="font-weight: bold; color: #8B0000;">@item.TenMenu</td>
+                    <td style="font-weight: bold; color: #28a745;">@item.Gia.ToString("N0") VNĐ</td>
+                    <td>@soMon món</td>
+                    <td>
+                        <a href="/Home/MenuTiec" class="btn btn-info"><i class="fas fa-eye"></i> Xem (Demo)</a>
+                        
+                        <a href="/Admin/EditMenuTiec/@item.Id_MenuTiec" class="btn btn-warning"><i class="fas fa-edit"></i> Sửa</a>
+                        
+                        <form action="/Admin/DeleteMenuTiec" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa Menu @item.TenMenu này không?');">
+                            <input type="hidden" name="id" value="@item.Id_MenuTiec" />
+                            <button type="submit" class="btn btn-danger" style="border:none; cursor:pointer; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: bold;"><i class="fas fa-trash"></i> Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</body>
+</html>

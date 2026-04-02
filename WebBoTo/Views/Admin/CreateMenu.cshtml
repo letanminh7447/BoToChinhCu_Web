@@ -1,0 +1,25 @@
+﻿@model WebBoTo.Models.MonAn
+@{
+    ViewData["Title"] = "Thêm món mới"; Layout = null;
+}
+<div style="max-width:500px; margin: 50px auto; font-family:sans-serif;">
+    <h2>Thêm món ăn mới</h2>
+    <form method="post" action="/Admin/CreateMenu" enctype="multipart/form-data">
+        <div style="margin-bottom:10px;"><label>Tên món:</label><br /><input type="text" name="TenMon" required style="width:100%; padding:8px;" /></div>
+        <div style="margin-bottom:10px;"><label>Mô tả:</label><br /><textarea name="MoTa" style="width:100%; padding:8px;"></textarea></div>
+        <div style="margin-bottom:10px;"><label>Giá (VNĐ):</label><br /><input type="number" name="Gia" required style="width:100%; padding:8px;" /></div>
+        <div style="margin-bottom:10px;">
+            <label>Danh mục:</label><br />
+            <select name="DanhMucId" required style="width:100%; padding:8px;">
+                <option value="">-- Chọn danh mục --</option>
+                @foreach (var dm in ViewBag.DanhMucs)
+                {
+                    <option value="@dm.Id_DM">@dm.TenDanhMuc</option>
+                }
+            </select>
+        </div>
+        <div style="margin-bottom:10px;"><label>Tải hình ảnh lên:</label><br /><input type="file" name="HinhAnhUpload" accept="image/*" style="width:100%; padding:8px;" /></div>
+        <button type="submit" style="padding:10px 20px; background:#28a745; color:#fff; border:none; cursor:pointer;">Lưu món ăn</button>
+        <a href="/Admin/QuanLyMenu" style="margin-left:10px;">Hủy</a>
+    </form>
+</div>

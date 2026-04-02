@@ -1,0 +1,242 @@
+﻿@model IEnumerable<WebBoTo.Models.MenuTiec>
+@{
+    ViewData["Title"] = "Thực Đơn Tiệc Tại Gia";
+}
+
+<style>
+    /* 1. NỚI RỘNG KHUNG VÀ THÊM NỀN CHÌM SANG TRỌNG */
+    .menu-tiec-wrapper {
+        /* Tạo họa tiết chấm bi mờ (Pattern) lấp đầy khoảng trống */
+        background-color: #121212;
+        background-image: radial-gradient(#333 1px, transparent 1px);
+        background-size: 30px 30px;
+        padding: 40px 0;
+        min-height: 100vh;
+    }
+
+    .menu-tiec-container { 
+        /* Đã tăng từ 1200px lên 1500px để tự động dàn thành 4 cột trên màn hình lớn */
+        max-width: 1500px; 
+        width: 95%;
+        margin: 0 auto; 
+        padding: 30px; 
+        background: radial-gradient(circle at top, #1a1a1a 0%, #121212 100%);
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        border: 1px solid #2a2a2a;
+    }
+    
+    /* Phần Tiêu đề trang */
+    .page-title-wrapper { text-align: center; border-bottom: 2px dashed #e6bc53; padding-bottom: 20px; margin-bottom: 40px; }
+    .page-title { 
+        color: #e6bc53; 
+        text-transform: uppercase; 
+        font-size: 36px; /* Tăng size xíu cho cân đối với màn hình rộng */
+        margin-bottom: 15px; 
+        font-weight: bold; 
+        text-shadow: 2px 2px 10px rgba(230,188,83,0.3);
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; 
+    }
+
+    /* Cụm nút bấm của Admin */
+    .admin-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
+    .btn-admin { padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 15px; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-admin-add { background-color: #28a745; color: #fff; box-shadow: 0 4px 10px rgba(40,167,69,0.4); border: 1px solid #28a745; }
+    .btn-admin-add:hover { background-color: #218838; transform: translateY(-2px); color: #fff; }
+    .btn-admin-manage { background-color: #333; color: #e6bc53; border: 1px solid #e6bc53; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    .btn-admin-manage:hover { background-color: #e6bc53; color: #333; transform: translateY(-2px); }
+
+    /* Form lọc giá */
+    .filter-container { display: flex; justify-content: flex-end; margin-bottom: 30px; }
+    .filter-form { display: flex; align-items: center; gap: 10px; background: rgba(26,26,26,0.8); padding: 10px 20px; border-radius: 8px; border: 1px solid #444; backdrop-filter: blur(5px); }
+    .filter-label { color: #e6bc53; font-weight: bold; font-size: 15px; }
+    .filter-select { 
+        background: #222; color: #fff; border: 1px solid #e6bc53; 
+        padding: 8px 15px; border-radius: 5px; outline: none; 
+        font-family: inherit; font-size: 15px; cursor: pointer;
+        transition: 0.3s;
+    }
+    .filter-select:focus, .filter-select:hover { box-shadow: 0 0 10px rgba(230,188,83,0.5); background: #2a2a2a; }
+
+    /* Lưới hiển thị các Menu (Tự động thích ứng) */
+    .menu-tiec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
+
+    /* Thiết kế thẻ Menu Card */
+    .menu-card { 
+        background-color: rgba(26,26,26,0.9); 
+        border: 1px solid #444; 
+        border-radius: 12px; 
+        box-shadow: 0 8px 25px rgba(0,0,0,0.6); 
+        transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s;
+        padding-bottom: 10px; 
+        position: relative;
+        overflow: hidden;
+    }
+    .menu-card::before {
+        content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #e6bc53; transition: 0.4s;
+    }
+    .menu-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(230,188,83,0.25); border-color: #e6bc53; }
+    .menu-card:hover::before { height: 6px; }
+
+    /* Ô VUÔNG BO TRÒN MÀU VÀNG TÊN MENU */
+    .menu-header { 
+        background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        color: #8B0000; 
+        text-align: center; 
+        padding: 12px 15px; 
+        font-size: 22px; 
+        font-weight: 900; 
+        text-transform: uppercase; 
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; 
+        border-radius: 8px; 
+        margin: 20px 20px 10px 20px; 
+        box-shadow: 0 4px 15px rgba(246, 211, 101, 0.4); 
+    }
+
+    /* Body chứa text và ảnh */
+    .menu-body { display: flex; padding: 15px 20px 20px 20px; gap: 15px; }
+
+    /* Danh sách món ăn */
+    .menu-list { 
+        flex: 1; 
+        color: #ddd; 
+        font-size: 15px; 
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; 
+    }
+    .menu-list ul { margin: 0; padding: 0; list-style-type: none; counter-reset: mon-counter; }
+    .menu-list li { 
+        border-bottom: 1px dashed #444; 
+        padding: 10px 0; 
+        position: relative;
+        padding-left: 22px;
+        transition: 0.2s;
+    }
+    .menu-list li:hover { color: #fff; padding-left: 26px; }
+    .menu-list li::before {
+        counter-increment: mon-counter;
+        content: counter(mon-counter) ". ";
+        position: absolute; left: 0; color: #e6bc53; font-weight: bold;
+    }
+    .menu-list li:last-child { border-bottom: none; }
+
+    /* Cột hình ảnh 2 bên */
+    .menu-images { display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; gap: 15px; }
+    .menu-images img { 
+        width: 90px; height: 90px; object-fit: cover; border-radius: 50%; 
+        border: 3px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+        transition: transform 0.4s, border-color 0.4s;
+    }
+    .menu-card:hover .menu-images img { border-color: #e6bc53; transform: rotate(5deg) scale(1.1); }
+
+    /* CSS cho bộ Phân trang */
+    .pagination-container { display: flex; justify-content: center; gap: 10px; margin-top: 50px; margin-bottom: 20px; }
+    .page-btn { 
+        padding: 10px 18px; background-color: #1a1a1a; color: #e6bc53; 
+        border: 1px solid #e6bc53; border-radius: 5px; text-decoration: none; 
+        font-weight: bold; font-size: 16px; transition: 0.3s; 
+    }
+    .page-btn:hover, .page-btn.active { background-color: #e6bc53; color: #8B0000; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(230,188,83,0.4); }
+</style>
+
+<div class="menu-tiec-wrapper">
+    <div class="menu-tiec-container">
+        <div class="page-title-wrapper">
+            <h2 class="page-title"><i class="fas fa-glass-cheers"></i> THỰC ĐƠN TIỆC TẠI GIA</h2>
+            
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+            {
+                <div class="admin-buttons">
+                    <a href="/Admin/CreateMenuTiec" class="btn-admin btn-admin-add">
+                        <i class="fas fa-plus-circle"></i> Thêm Menu Tiệc Mới
+                    </a>
+                    <a href="/Admin/QuanLyMenuTiec" class="btn-admin btn-admin-manage">
+                        <i class="fas fa-tasks"></i> Quản lý Menu tiệc
+                    </a>
+                </div>
+            }
+        </div>
+
+        <div class="filter-container">
+            <form action="/Home/MenuTiec" method="get" class="filter-form">
+                <label for="sortOrder" class="filter-label"><i class="fas fa-filter"></i> Sắp xếp:</label>
+                <select name="sortOrder" id="sortOrder" class="filter-select" onchange="this.form.submit()">
+                    <option value="" selected="@(string.IsNullOrEmpty(ViewBag.CurrentSort))">Mặc định</option>
+                    <option value="gia_tang" selected="@(ViewBag.CurrentSort == "gia_tang")">Giá: Thấp -> Cao</option>
+                    <option value="gia_giam" selected="@(ViewBag.CurrentSort == "gia_giam")">Giá: Cao -> Thấp</option>
+                </select>
+            </form>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <p style="text-align: center; color: #888; font-size: 18px; margin-top: 50px;">
+                <i class="fas fa-box-open fa-3x" style="margin-bottom: 15px; color: #555;"></i><br />
+                Hiện tại quán chưa có thực đơn nào khớp với tìm kiếm.
+            </p>
+        }
+        else
+        {
+            <div class="menu-tiec-grid">
+                @foreach (var item in Model)
+                {
+                    <div class="menu-card">
+                        <div class="menu-header">
+                            @item.TenMenu: @item.Gia.ToString("N0") VNĐ
+                        </div>
+
+                        <div class="menu-body">
+                            <div class="menu-list">
+                                <ul>
+                                    @foreach (var mon in item.DanhSachMonAn.Split(new[] { ',', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        <li>@mon.Trim()</li>
+                                    }
+                                </ul>
+                            </div>
+
+                            <div class="menu-images">
+                                @if (!string.IsNullOrEmpty(item.HinhAnh1))
+                                {
+                                    <img src="/images/@item.HinhAnh1" alt="Món ăn minh họa 1" />
+                                }
+                                else
+                                {
+                                    <img src="https://via.placeholder.com/90/333333/e6bc53?text=Anh+1" alt="Ảnh trống" />
+                                }
+
+                                @if (!string.IsNullOrEmpty(item.HinhAnh2))
+                                {
+                                    <img src="/images/@item.HinhAnh2" alt="Món ăn minh họa 2" />
+                                }
+                                else
+                                {
+                                    <img src="https://via.placeholder.com/90/333333/e6bc53?text=Anh+2" alt="Ảnh trống" />
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (ViewBag.TotalPages > 1)
+            {
+                <div class="pagination-container">
+                    @if (ViewBag.CurrentPage > 1)
+                    {
+                        <a href="/Home/MenuTiec?sortOrder=@ViewBag.CurrentSort&page=@(ViewBag.CurrentPage - 1)" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+                    }
+
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <a href="/Home/MenuTiec?sortOrder=@ViewBag.CurrentSort&page=@i" class="page-btn @(i == ViewBag.CurrentPage ? "active" : "")">@i</a>
+                    }
+
+                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                    {
+                        <a href="/Home/MenuTiec?sortOrder=@ViewBag.CurrentSort&page=@(ViewBag.CurrentPage + 1)" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>

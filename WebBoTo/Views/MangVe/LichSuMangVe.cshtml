@@ -1,0 +1,201 @@
+﻿@model IEnumerable<WebBoTo.Models.DonMangVe>
+@{
+    ViewData["Title"] = "Lịch Sử Mua Mang Về";
+    var chiTiet = ViewBag.ChiTietDon as List<WebBoTo.Models.ChiTietDonMangVe>;
+}
+
+<style>
+    /* NỀN VÀ KHUNG ĐỒNG BỘ VỚI TRANG ĐẶT TIỆC */
+    .history-wrapper {
+        background-color: #121212;
+        background-image: radial-gradient(#333 1px, transparent 1px);
+        background-size: 30px 30px;
+        padding: 50px 0;
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .history-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: radial-gradient(circle at top, #1a1a1a 0%, #121212 100%);
+        padding: 40px;
+        border-radius: 15px;
+        border: 1px solid #e6bc53;
+        color: #fff;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+    }
+
+    .page-title {
+        color: #e6bc53;
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 35px;
+        text-transform: uppercase;
+        border-bottom: 2px dashed #555;
+        padding-bottom: 20px;
+        font-weight: 900;
+        font-size: 28px;
+    }
+
+    /* THIẾT KẾ THẺ ĐƠN HÀNG */
+    .order-card {
+        background: rgba(26,26,26,0.9);
+        border: 1px solid #444;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    /* Thanh viền vàng bên trái thẻ */
+    .order-card::before {
+        content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px; background: #e6bc53; transition: 0.3s;
+    }
+    .order-card:hover {
+        border-color: #e6bc53;
+        box-shadow: 0 10px 25px rgba(230, 188, 83, 0.2);
+        transform: translateY(-3px);
+    }
+    .order-card:hover::before { width: 6px; }
+
+    /* HEADER CỦA ĐƠN */
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        border-bottom: 1px dashed #444;
+        padding-bottom: 15px;
+    }
+    .order-id { font-size: 20px; color: #e6bc53; font-weight: bold; margin: 0; }
+
+    /* NHÃN TRẠNG THÁI */
+    .status-badge { padding: 6px 15px; border-radius: 30px; font-size: 13px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+    .status-0 { background: #ffc107; color: #000; }
+    .status-1 { background: #17a2b8; color: #fff; }
+    .status-2 { background: #007bff; color: #fff; }
+    .status-3 { background: #28a745; color: #fff; }
+    .status--1 { background: #dc3545; color: #fff; }
+
+    /* THÔNG TIN CHUNG (FIX LỖI TRÀN CHỮ Ở ĐÂY) */
+    .order-info {
+        background: #222;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #333;
+    }
+    .order-info p { 
+        margin-bottom: 8px; 
+        color: #ccc; 
+        line-height: 1.6;
+        /* ĐÂY LÀ THUỘC TÍNH SỬA LỖI LINK GOOGLE MAP DÀI ĐÂM THỦNG MÀN HÌNH */
+        word-break: break-word; 
+    }
+    .order-info p:last-child { margin-bottom: 0; }
+    .order-info strong { color: #fff; }
+
+    /* BẢNG MÓN ĂN */
+    .table-title { margin-top: 25px; color: #e6bc53; font-size: 16px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
+    
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #1a1a1a; border-radius: 8px; overflow: hidden; }
+    th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; }
+    th { background: #3e1f00; color: #e6bc53; font-weight: bold; text-transform: uppercase; font-size: 14px; border-bottom: 2px solid #e6bc53; }
+    td { color: #ddd; font-size: 15px; }
+    tr:last-child td { border-bottom: none; }
+    
+    /* DÒNG TỔNG TIỀN */
+    .total-row {
+        font-size: 20px;
+        font-weight: 900;
+        text-align: right;
+        margin-top: 20px;
+        color: #e6bc53;
+        padding-top: 15px;
+        border-top: 1px dashed #555;
+    }
+</style>
+
+<div class="history-wrapper">
+    <div class="history-container">
+        <h2 class="page-title"><i class="fas fa-history"></i> LỊCH SỬ MUA MANG VỀ</h2>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div style="text-align: center; padding: 60px 20px; color: #888; background: #1a1a1a; border-radius: 12px; border: 1px dashed #444;">
+                <i class="fas fa-box-open" style="font-size: 70px; margin-bottom: 20px; display: block; opacity: 0.5; color: #e6bc53;"></i>
+                <h4 style="color: #ccc; font-size: 20px;">Bạn chưa có đơn mua mang về nào</h4>
+                <p style="font-size: 15px;">Hãy đặt món mang về ngay để thưởng thức nhé!</p>
+            </div>
+        }
+        else
+        {
+            foreach (var don in Model)
+            {
+                var ctList = chiTiet?.Where(c => c.Id_Don == don.Id_Don).ToList();
+
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <h3 class="order-id"><i class="fas fa-receipt"></i> Mã đơn: #MV@(don.Id_Don)</h3>
+                        </div>
+                        <div>
+                            @if (don.TrangThai == 0) { <span class="status-badge status-0">⏳ Chờ xác nhận</span> }
+                            else if (don.TrangThai == 1) { <span class="status-badge status-1">🔧 Đang chuẩn bị</span> }
+                            else if (don.TrangThai == 2) { <span class="status-badge status-2">🚚 Đang giao</span> }
+                            else if (don.TrangThai == 3) { <span class="status-badge status-3">✅ Hoàn thành</span> }
+                            else if (don.TrangThai == -1) { <span class="status-badge status--1">❌ Đã hủy</span> }
+                        </div>
+                    </div>
+
+                    <div class="order-info">
+                        <p><strong><i class="far fa-calendar-alt"></i> Ngày đặt:</strong> @don.NgayDat.ToString("dd/MM/yyyy HH:mm")</p>
+                        <p><strong><i class="fas fa-truck"></i> Hình thức:</strong> @(don.HinhThucNhan == 1 ? "Đến cửa hàng lấy" : "Giao hàng tận nơi")</p>
+                        
+                        @if (don.HinhThucNhan == 2)
+                        {
+                            <p><strong><i class="fas fa-map-marker-alt"></i> Địa chỉ:</strong> @don.DiaChiGiaoHang</p>
+                            <p><strong><i class="fas fa-route"></i> Khoảng cách:</strong> @don.KhoangCachKm km — Phí ship: <strong>@don.PhiGiaoHang.ToString("N0") VNĐ</strong></p>
+                        }
+                    </div>
+
+                    <div class="table-title"><i class="fas fa-utensils"></i> Danh sách món ăn</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tên món</th>
+                                <th style="text-align:center; width: 15%;">Số lượng</th>
+                                <th style="text-align:right; width: 25%;">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ctList != null && ctList.Any())
+                            {
+                                foreach (var ct in ctList)
+                                {
+                                    <tr>
+                                        <td style="font-weight: bold; color: #fff;">@(ct.MonAn != null ? ct.MonAn.TenMon : "Món ăn đang cập nhật")</td>
+                                        <td style="text-align:center;">@ct.SoLuong</td>
+                                        <td style="text-align:right;">@ct.ThanhTien.ToString("N0") VNĐ</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" style="text-align:center; color: #888; font-style: italic;">Chưa có chi tiết món ăn</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="total-row">
+                        Tổng thanh toán: <span>@don.TongThanhToan.ToString("N0") VNĐ</span>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

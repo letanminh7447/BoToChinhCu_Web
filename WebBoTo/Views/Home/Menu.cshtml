@@ -1,0 +1,188 @@
+﻿@model IEnumerable<WebBoTo.Models.MonAn>
+@{
+    ViewData["Title"] = "Menu Món Ăn";
+}
+<style>
+    /* --- CSS CHO BỐ CỤC CHÍNH --- */
+    .main-container {
+        display: flex;
+        width: 85%;
+        margin: 50px auto;
+        gap: 30px;
+        align-items: flex-start;
+    }
+
+    /* --- SIDEBAR DANH MỤC LỌC MÓN --- */
+    .sidebar { width: 25%; }
+    .section-header {
+        background-color: #b88645;
+        color: #fff;
+        padding: 12px 15px;
+        font-size: 16px;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-bottom: 4px dotted #fff;
+        margin-bottom: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .sidebar-menu {
+        list-style: none; padding: 0; margin: 0; background: #242424;
+    }
+    .sidebar-menu > li { border-bottom: 1px solid #333; }
+    .sidebar-menu > li > a {
+        padding: 15px; color: #e6bc53; font-size: 14px; text-transform: uppercase;
+        text-decoration: none; display: flex; justify-content: space-between; align-items: center;
+        transition: 0.3s;
+    }
+    /* Đổi màu khi rê chuột hoặc khi đang chọn danh mục đó */
+    .sidebar-menu > li:hover > a, .sidebar-menu > li.active > a { background: #3e1f00; color: #fff; }
+
+    /* --- LƯỚI MÓN ĂN --- */
+    .content-area { width: 75%; }
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    .menu-item {
+        background-color: #242424; /* Nền xám đen giống hình mẫu */
+        border-radius: 8px;
+        padding-bottom: 15px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        transition: 0.3s;
+    }
+    .menu-item:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.8); }
+
+    /* --- HÌNH ẢNH MÓN ĂN GỐC --- */
+    .img-wrapper { position: relative; }
+    .main-thumb {
+        width: 100%; height: 200px; object-fit: cover;
+        border-top-left-radius: 8px; border-top-right-radius: 8px; cursor: pointer;
+    }
+
+    /* --- CHỮ BÊN TRONG THẺ MÓN ĂN --- */
+    .menu-info { padding: 15px; }
+    .menu-info h3 { color: #fff; font-size: 17px; margin: 0 0 10px 0; }
+    .menu-info p { color: #aaa; font-size: 13px; margin: 0 0 10px 0; min-height: 38px; }
+    
+    /* --- CSS MỚI CHO GIÁ TIỀN BẮT MẮT --- */
+    .price { 
+        color: #ffcc00; /* Màu vàng sáng rực rỡ */
+        font-size: 24px; /* Kích thước to hơn hẳn */
+        font-weight: 900; /* In đậm tối đa */
+        margin-top: 15px;
+        letter-spacing: 1px; /* Khoảng cách giữa các số thoáng hơn */
+        /* Hiệu ứng đổ bóng đen sắc nét và phát sáng (glow) vàng xung quanh */
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 204, 0, 0.6);
+        display: inline-block;
+        transition: 0.3s;
+    }
+
+    /* Thêm hiệu ứng nhấp nháy/phóng to nhẹ khi rê chuột vào giá tiền */
+    .menu-item:hover .price {
+        transform: scale(1.1);
+        color: #fff200;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 242, 0, 0.8);
+    }
+    /* CSS cho bộ Phân trang */
+    .pagination-container { display: flex; justify-content: center; gap: 10px; margin-top: 40px; margin-bottom: 20px; }
+    .page-btn { 
+        padding: 8px 16px; 
+        background-color: #1a1a1a; 
+        color: #e6bc53; 
+        border: 1px solid #e6bc53; 
+        border-radius: 5px; 
+        text-decoration: none; 
+        font-weight: bold; 
+        font-size: 16px;
+        transition: 0.3s; 
+    }
+    .page-btn:hover, .page-btn.active { 
+        background-color: #e6bc53; 
+        color: #8B0000; /* Chữ đỏ đô nổi bật khi đang chọn */
+    }
+</style>
+
+<div class="main-container">
+    
+    <div class="sidebar">
+        <div class="section-header">
+            <span>Danh Mục Món Ăn</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="@(ViewBag.SelectedDanhMuc == null ? "active" : "")">
+                <a href="/Home/Menu">TẤT CẢ MÓN ĂN</a>
+            </li>
+            
+            @if (ViewBag.DanhMucs != null)
+            {
+                foreach (var dm in ViewBag.DanhMucs)
+                {
+                    <li class="@(ViewBag.SelectedDanhMuc == dm.Id_DM ? "active" : "")">
+                        <a href="/Home/Menu?danhMucId=@dm.Id_DM">@dm.TenDanhMuc</a>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+
+    <div class="content-area">
+        <div class="section-header" style="margin-bottom: 20px;">
+            <span>THỰC ĐƠN TẠI QUÁN</span>
+        </div>
+
+        <div class="menu-grid">
+            @if (!Model.Any())
+            {
+                <p style="color: #ccc; text-align: center; width: 100%; margin-top: 20px;">Hiện chưa có món ăn nào thuộc danh mục này.</p>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <div class="menu-item">
+                        <div class="img-wrapper">
+                            <a href="/Home/ChiTietMonAn/@item.Id_MonAn">
+                                <img src="@(string.IsNullOrEmpty(item.HinhAnh) ? "https://via.placeholder.com/300x200?text=Mon+An" : "/images/" + item.HinhAnh)"
+                                     alt="@item.TenMon"
+                                     title="@item.TenMon"
+                                     class="main-thumb" />
+                            </a>
+                        </div>
+
+                        <div class="menu-info">
+                            <h3>
+                                <a href="/Home/ChiTietMonAn/@item.Id_MonAn" style="color: #fff; text-decoration: none; transition: 0.2s;" onmouseover="this.style.color='#e6bc53'" onmouseout="this.style.color='#fff'">
+                                    @item.TenMon
+                                </a>
+                            </h3>
+                            <p>@item.MoTa</p>
+                            <p class="price">@item.Gia.ToString("N0") VNĐ</p>
+                        </div>
+                    </div>
+                }
+            }
+        </div> @if (ViewBag.TotalPages > 1)
+        {
+            <div class="pagination-container">
+                @if (ViewBag.CurrentPage > 1)
+                {
+                    <a href="/Home/Menu?danhMucId=@ViewBag.SelectedDanhMuc&page=@(ViewBag.CurrentPage - 1)" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+                }
+
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <a href="/Home/Menu?danhMucId=@ViewBag.SelectedDanhMuc&page=@i" class="page-btn @(i == ViewBag.CurrentPage ? "active" : "")">@i</a>
+                }
+
+                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                {
+                    <a href="/Home/Menu?danhMucId=@ViewBag.SelectedDanhMuc&page=@(ViewBag.CurrentPage + 1)" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,155 @@
+﻿@model WebBoTo.Models.DonMangVe
+@{
+    ViewData["Title"] = "Chi Tiết Đơn Mang Về";
+    Layout = "_Layout";
+}
+
+<style>
+    /* Tổng thể */
+    .order-detail-wrapper { max-width: 1000px; margin: 40px auto; font-family: sans-serif; color: #e0e0e0; }
+    .back-link { color: #f39c12; text-decoration: none; font-size: 15px; margin-bottom: 20px; display: inline-block; font-weight: bold; transition: 0.2s; }
+    .back-link:hover { color: #ffcc00; text-decoration: underline; }
+
+    /* Thẻ Card chứa thông tin */
+    .section-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 30px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+    .section-header { color: #f39c12; font-size: 18px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 25px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+    
+    /* Lưới thông tin 2 cột */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .info-block { background: #222; padding: 20px; border-radius: 8px; border: 1px solid #2a2a2a; }
+    .info-item { display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px dashed #333; padding-bottom: 8px; }
+    .info-item:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+    .info-label { color: #888; font-size: 14px; }
+    .info-value { color: #fff; font-size: 15px; font-weight: bold; text-align: right; }
+
+    /* BẢNG MÓN ĂN - RỘNG RÃI & CHUẨN XÁC */
+    .custom-table { width: 100%; border-collapse: collapse; }
+    .custom-table th { background: #2c3e50; color: #f39c12; padding: 18px 15px; font-size: 14px; text-transform: uppercase; border: none; }
+    .custom-table th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .custom-table th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+    
+    .custom-table td { padding: 18px 15px; border-bottom: 1px solid #333; vertical-align: middle; transition: 0.2s; }
+    .custom-table tbody tr:hover td { background-color: #242424; }
+    
+    /* Căn lề từng cột */
+    .col-name { text-align: left; width: 45%; font-weight: bold; font-size: 16px; color: #fff; }
+    .col-qty { text-align: center; width: 15%; color: #ccc; }
+    .col-price { text-align: right; width: 20%; color: #aaa; }
+    .col-total { text-align: right; width: 20%; color: #f39c12; font-weight: bold; font-size: 16px; }
+
+    /* Khung Tổng Tiền */
+    .total-box { background: linear-gradient(to right, #1a1a1a, #2c1e16); border: 1px solid #444; border-left: 5px solid #e74c3c; border-radius: 8px; padding: 25px; margin-top: 25px; display: flex; justify-content: space-between; align-items: center; }
+    .total-box .sum-label { color: #fff; font-size: 18px; text-transform: uppercase; font-weight: bold; }
+    .total-box .sum-value { color: #e74c3c; font-size: 28px; font-weight: bold; }
+
+    /* Khu vực Cập nhật trạng thái */
+    .action-area { display: flex; align-items: center; justify-content: center; gap: 15px; background: #222; padding: 25px; border-radius: 8px; border: 1px dashed #555; }
+    .status-select { background: #111; color: #fff; border: 1px solid #555; padding: 12px 20px; border-radius: 6px; font-size: 15px; min-width: 250px; outline: none; cursor: pointer; }
+    .status-select:focus { border-color: #f39c12; }
+    .btn-update { background: #27ae60; color: #fff; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s; }
+    .btn-update:hover { background: #2ecc71; box-shadow: 0 0 15px rgba(39, 174, 96, 0.4); }
+</style>
+
+<div class="order-detail-wrapper">
+    <a href="/Admin/QuanLyDonMangVe" class="back-link"><i class="fas fa-arrow-left"></i> Quay lại danh sách đơn</a>
+
+    <div class="section-card" style="background: linear-gradient(45deg, #1a252f, #1a1a1a); border-left: 5px solid #3498db;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0; color: #fff; font-weight: bold; font-size: 24px;">CHI TIẾT ĐƠN <span style="color: #f39c12;">#MV@(Model.Id_Don)</span></h2>
+            <div style="background: #222; padding: 8px 15px; border-radius: 20px; font-size: 14px; border: 1px solid #444;">
+                <i class="far fa-clock text-warning"></i> @Model.NgayDat.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        </div>
+    </div>
+
+    <div class="info-grid mb-4">
+        <div class="info-block">
+            <div class="section-header"><i class="fas fa-user-circle"></i> Thông tin khách hàng</div>
+            <div class="info-item">
+                <span class="info-label">Họ và tên</span>
+                <span class="info-value">@(Model.TaiKhoan?.HoTen ?? "Khách vãng lai")</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value">@(Model.TaiKhoan?.Email ?? "N/A")</span>
+            </div>
+        </div>
+
+        <div class="info-block">
+            <div class="section-header"><i class="fas fa-motorcycle"></i> Thông tin giao hàng</div>
+            <div class="info-item">
+                <span class="info-label">Hình thức</span>
+                <span class="info-value text-info">@(Model.HinhThucNhan == 1 ? "Lấy tại quán" : "Giao tận nơi")</span>
+            </div>
+            @if (Model.HinhThucNhan == 2)
+            {
+                <div class="info-item">
+                    <span class="info-label">Địa chỉ</span>
+                    <span class="info-value" style="text-align: right; max-width: 60%;">@Model.DiaChiGiaoHang</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Khoảng cách</span>
+                    <span class="info-value">@Model.KhoangCachKm km</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phí ship</span>
+                    <span class="info-value text-warning">@Model.PhiGiaoHang.ToString("N0") đ</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header"><i class="fas fa-utensils"></i> Danh sách món ăn</div>
+        
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th class="col-name">Tên món</th>
+                    <th class="col-qty">Số lượng</th>
+                    <th class="col-price">Đơn giá</th>
+                    <th class="col-total">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.ChiTietDonMangVes != null)
+                {
+                    foreach (var ct in Model.ChiTietDonMangVes)
+                    {
+                        <tr>
+                            <td class="col-name">@ct.MonAn?.TenMon</td>
+                            <td class="col-qty">x @ct.SoLuong</td>
+                            <td class="col-price">@ct.DonGia.ToString("N0") đ</td>
+                            <td class="col-total">@ct.ThanhTien.ToString("N0") đ</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <div class="total-box">
+            <span class="sum-label">Tổng thanh toán</span>
+            <span class="sum-value">@Model.TongThanhToan.ToString("N0") VNĐ</span>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header" style="border-bottom: none; margin-bottom: 10px; justify-content: center;"><i class="fas fa-edit"></i> Xử lý đơn hàng</div>
+        
+        <form asp-action="CapNhatTrangThaiDonMangVe" method="post" class="action-area">
+            <input type="hidden" name="id" value="@Model.Id_Don" />
+        
+            <select name="trangThaiMoi" class="status-select">
+                <option value="0" selected="@(Model.TrangThai == 0)">⏳ Chờ xác nhận</option>
+                <option value="1" selected="@(Model.TrangThai == 1)">🔧 Đang chuẩn bị</option>
+                <option value="2" selected="@(Model.TrangThai == 2)">🚚 Đang giao</option>
+                <option value="3" selected="@(Model.TrangThai == 3)">✅ Hoàn thành</option>
+                <option value="-1" selected="@(Model.TrangThai == -1)">❌ Hủy đơn</option>
+            </select>
+
+            <button type="submit" class="btn-update">
+                <i class="fas fa-save"></i> Cập nhật ngay
+            </button>
+        </form>
+    </div>
+</div>

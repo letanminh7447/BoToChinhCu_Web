@@ -1,0 +1,292 @@
+﻿@model IEnumerable<WebBoTo.Models.MonAn>
+@{ 
+    ViewData["Title"] = "Đặc Sản Bò Tơ Củ Chi";     
+}
+
+<style>
+    /* --- CSS HEADER BANNER --- */
+    .header-banner { 
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1544025162-8311ab3b80b7?q=80&w=1200') center/cover; 
+        background-attachment: fixed;
+        padding: 100px 20px; text-align: center; border-bottom: 5px solid var(--primary-color); 
+    }
+    .header-banner h1 { color: #e6bc53; font-size: 3.5em; margin: 0; text-transform: uppercase; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); letter-spacing: 2px;}
+    .header-banner h2 { color: #fff; font-size: 1.8em; margin: 10px 0 20px 0; font-weight: 300;}
+    .header-banner p { color: #ccc; font-size: 1.1em; margin-bottom: 30px;}
+    
+    .btn-book-now {
+        display: inline-block; padding: 15px 40px; background-color: #8B0000; color: #fff; font-size: 20px; font-weight: bold; text-decoration: none; border-radius: 50px; text-transform: uppercase; border: 2px solid #ff4d4d; box-shadow: 0 0 15px rgba(139, 0, 0, 0.6);
+        animation: pulse 1.5s infinite; transition: 0.3s;
+    }
+    .btn-book-now:hover { background-color: #e6bc53; color: #000; border-color: #e6bc53; box-shadow: 0 0 25px rgba(230, 188, 83, 0.8); }
+    
+    @@keyframes pulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.7); }
+        50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255, 77, 77, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 77, 0); }
+    }
+
+    /* --- CSS GIỚI THIỆU & CAM KẾT --- */
+    .intro-section { width: 85%; margin: 60px auto 40px auto; text-align: center; line-height: 1.8; }
+    .intro-title { color: #e6bc53; font-family: 'Dancing Script', cursive; font-size: 48px; margin-bottom: 10px; font-weight: 700; text-shadow: 1px 1px 2px #000;}
+    .intro-text { color: #ccc; font-size: 18px; max-width: 800px; margin: 0 auto 20px auto; }
+    .intro-divider { width: 120px; height: 3px; background-color: #8B0000; margin: 20px auto; border-radius: 5px;}
+
+    .features-grid { display: flex; justify-content: center; gap: 30px; margin-top: 40px; }
+    .feature-box { background: #242424; padding: 25px 20px; border-radius: 10px; width: 250px; border-bottom: 3px solid #8B0000; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.5);}
+    .feature-box:hover { transform: translateY(-10px); border-bottom-color: #e6bc53; }
+    .feature-box i { font-size: 40px; color: #e6bc53; margin-bottom: 15px; }
+    .feature-box h4 { color: #fff; margin: 0 0 10px 0; font-size: 18px; text-transform: uppercase;}
+    .feature-box p { color: #aaa; font-size: 14px; margin: 0; line-height: 1.5; }
+
+    /* --- CSS BỐ CỤC CHÍNH --- */
+    .main-container { display: flex; width: 85%; margin: 60px auto; gap: 40px; align-items: flex-start; }
+    
+    .sidebar { width: 25%; position: sticky; top: 80px; }
+    .section-header { background: linear-gradient(90deg, #8B0000, #b88645); color: #fff; padding: 15px 20px; font-size: 17px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0; margin-bottom: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+    .sidebar-menu { list-style: none; padding: 0; margin: 0; background: #1a1a1a; border-radius: 0 0 8px 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
+    .sidebar-menu li { border-bottom: 1px solid #333; transition: 0.3s; }
+    .sidebar-menu li:hover { background: #2a2a2a; border-left: 4px solid #e6bc53; }
+    .sidebar-menu li a { padding: 16px 20px; color: #fff; font-size: 14px; text-transform: uppercase; text-decoration: none; display: flex; justify-content: flex-start; align-items: center; gap: 15px; font-weight: 500;}
+    
+    .sidebar-dropdown > a i:last-child { margin-left: auto; transition: transform 0.3s ease; }
+    .sidebar-dropdown.active .sidebar-submenu { display: block; }
+    .sidebar-dropdown.active > a { color: #e6bc53; }
+    .sidebar-dropdown.active > a i:last-child { transform: rotate(180deg); color: #e6bc53;}
+
+    .sidebar-submenu { display: none; list-style: none; padding: 0; margin: 0; background-color: #242424; }
+    .sidebar-submenu li { border-bottom: 1px solid #333; border-left: none !important;}
+    .sidebar-submenu li a { padding: 12px 15px 12px 35px; font-size: 13px; color: #ccc; text-transform: none; }
+    .sidebar-submenu li a:hover { color: #e6bc53; padding-left: 40px; transition: 0.3s;}
+
+    /* --- CSS DANH SÁCH MÓN ĂN & ÉP PHẲNG GIÁ TIỀN --- */
+    .content-area { width: 75%; }
+    .content-area .section-header { margin-bottom: 30px; border-radius: 8px; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; width: 100%; margin: 0; }
+    
+    .menu-item { 
+        background-color: #1e1e1e; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); 
+        overflow: hidden; position: relative; transition: 0.3s; border: 1px solid #333;
+        display: flex; flex-direction: column; /* Quan trọng: Biến item thành cột flexbox */
+    }
+    .menu-item:hover { transform: translateY(-8px); box-shadow: 0 10px 25px rgba(230,188,83,0.3); border-color: #e6bc53;}
+    
+    .menu-info { 
+        padding: 20px 15px; text-align: center; 
+        display: flex; flex-direction: column; /* Quan trọng: Biến khu vực info thành cột */
+        flex-grow: 1; /* Quan trọng: Yêu cầu info giãn hết cỡ để lấp đầy khoảng trống */
+    }
+    .menu-info h3 { margin: 0 0 10px 0; color: #fff; font-size: 18px; }
+    .menu-info p { 
+        margin: 0 0 15px 0; font-size: 13px; color: #aaa; 
+        display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        flex-grow: 1; /* Quan trọng: Ô mô tả giãn ra đẩy giá tiền xuống đáy */
+    }
+    
+    .price-wrapper {
+        margin-top: auto; /* Lực đẩy ma thuật giữ giá luôn ở sát đáy */
+        padding-top: 10px;
+    }
+    .price { 
+        color: #ffcc00 !important; font-size: 18px !important; font-weight: 900 !important; 
+        padding: 8px 25px; background: rgba(255, 204, 0, 0.15); border: 1px solid #ffcc00; 
+        border-radius: 30px; display: inline-block; box-shadow: 0 0 10px rgba(255, 204, 0, 0.2); margin: 0;
+    }
+
+    /* --- CSS NHÃN HOT "GAI" CÓ VẦNG SÁNG ZOOM RA --- */
+    .hot-badge-container {
+        position: absolute;
+        top: -5px; left: -5px; /* Để gai lòi ra ngoài mép ảnh */
+        width: 60px; height: 60px;
+        z-index: 10;
+        transform: rotate(-15deg); /* Góc nghiêng phá cách */
+    }
+
+    /* Bản thân cái nhãn HOT màu đỏ */
+    .hot-badge { 
+        width: 100%; height: 100%;
+        background: linear-gradient(135deg, #ff0000 0%, #ff6600 100%); 
+        color: white; display: flex; justify-content: center; align-items: center; 
+        font-size: 15px; font-weight: 900; letter-spacing: 1px;
+        clip-path: polygon(50% 0%, 63% 18%, 85% 15%, 82% 37%, 100% 50%, 82% 63%, 85% 85%, 63% 82%, 50% 100%, 37% 82%, 15% 85%, 18% 63%, 0% 50%, 18% 37%, 15% 15%, 37% 18%);
+        position: relative; z-index: 2;
+        text-shadow: 1px 1px 2px #000;
+        animation: badgePulse 1.5s infinite alternate; /* Hiệu ứng phập phồng nhẹ */
+    }
+
+    /* Vầng sáng phía sau zoom to ra rồi mờ dần (Ripple Effect) */
+    .hot-badge-container::after {
+        content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: #ff0000;
+        clip-path: polygon(50% 0%, 63% 18%, 85% 15%, 82% 37%, 100% 50%, 82% 63%, 85% 85%, 63% 82%, 50% 100%, 37% 82%, 15% 85%, 18% 63%, 0% 50%, 18% 37%, 15% 15%, 37% 18%);
+        z-index: 1;
+        animation: zoomGlow 1.5s infinite ease-out; /* Hoạt ảnh zoom vòng tròn */
+    }
+
+    @@keyframes badgePulse {
+        0% { transform: scale(1); filter: brightness(1); }
+        100% { transform: scale(1.05); filter: brightness(1.2); }
+    }
+
+    @@keyframes zoomGlow {
+        0% { transform: scale(1); opacity: 0.8; }
+        100% { transform: scale(1.8); opacity: 0; }
+    }
+
+    /* --- HIỆU ỨNG ẢNH --- */
+    .img-wrapper { position: relative; overflow: hidden; }
+    .main-thumb { width: 100%; height: 220px; object-fit: cover; transition: transform 0.5s ease; cursor: pointer; }
+    .menu-item:hover .main-thumb { transform: scale(1.1); } 
+    
+    .img-popup { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); width: 280px; background: #fff; padding: 5px; border-radius: 8px; box-shadow: 0px 10px 30px rgba(0,0,0,0.9); z-index: 999; margin-bottom: 10px;}
+    .img-popup::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -10px; border-width: 10px; border-style: solid; border-color: #fff transparent transparent transparent; }
+    .img-popup img { width: 100%; height: auto; object-fit: contain; border-radius: 4px; }
+    .img-wrapper:hover .img-popup { display: block; animation: fadeIn 0.3s ease; }
+
+    @@keyframes fadeIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+    /* --- NÚT LIÊN HỆ --- */
+    .floating-buttons { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 1000; }
+    .float-btn { width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.3s; position: relative; }
+    .float-btn:hover { transform: scale(1.1); }
+    .btn-zalo { background-color: #0088FF; }
+    .btn-phone { background-color: #00A651; animation: vibrate 2s infinite; }
+    
+    @@keyframes vibrate {
+        0%, 10%, 20%, 30%, 40%, 100% { transform: rotate(0deg); }
+        5%, 15%, 25%, 35% { transform: rotate(15deg); }
+        12%, 22%, 32% { transform: rotate(-15deg); }
+    }
+</style>
+
+<div class="header-banner">
+    <h1>BÒ TƠ CHÍNH CƯ</h1>
+    <h2>Tuyệt Phẩm Ẩm Thực Củ Chi - Tươi Ngon Mỗi Ngày</h2>
+    <p>Số 2, Phạm Văn Chèo, Thị Trấn Củ Chi, Tp.HCM</p>
+    <a href="/Home/DatBan" class="btn-book-now"><i class="fas fa-calendar-check"></i> Đặt Bàn Ngay</a>
+</div>
+
+<div class="intro-section">
+    <div class="intro-title">Hương Vị Gia Đình Chạm Đến Trái Tim</div>
+    <div class="intro-divider"></div>
+    <p class="intro-text">
+        Chào mừng thực khách đến với <strong>Bò Tơ Chính Cư</strong>. Không chỉ vang danh với các món Bò Tơ Củ Chi nức tiếng như bò nướng tảng xèo xèo trên bếp than hồng hay nhúng mẻ chua thanh, chúng tôi còn mang đến không gian rộng rãi, thoáng mát, là điểm hẹn lý tưởng cho mọi gia đình.
+    </p>
+
+    <div class="features-grid">
+        <div class="feature-box">
+            <i class="fas fa-drumstick-bite"></i>
+            <h4>Thịt Tươi Mỗi Ngày</h4>
+            <p>100% Bò tơ Củ Chi chuẩn vị, mổ mới mỗi ngày, nói không với hàng đông lạnh.</p>
+        </div>
+        <div class="feature-box">
+            <i class="fas fa-leaf"></i>
+            <h4>Không Gian Thoáng</h4>
+            <p>Rộng rãi, mát mẻ, có phòng VIP và bãi đỗ xe ô tô an toàn, sức chứa lớn.</p>
+        </div>
+        <div class="feature-box">
+            <i class="fas fa-users"></i>
+            <h4>Dịch Vụ Tận Tâm</h4>
+            <p>Đội ngũ nhân viên chuyên nghiệp, nhận đặt tiệc sinh nhật, liên hoan trọn gói.</p>
+        </div>
+    </div>
+</div>
+
+<div class="main-container">
+    
+    <div class="sidebar">
+        <div class="section-header">
+            <i class="fas fa-bars"></i> DANH MỤC TRANG
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="/"><i class="fas fa-home"></i> TRANG CHỦ</a></li>
+            <li class="sidebar-dropdown">
+                <a href="#" onclick="toggleSidebarMenu(event, this)"><i class="fas fa-utensils"></i> MENU MÓN ĂN <i class="fas fa-chevron-down"></i></a>
+                <ul class="sidebar-submenu">
+                    <li><a href="/Home/Menu">Menu tại Quán</a></li>
+                    <li><a href="/Home/DatBan">Đặt bàn trước</a></li>
+                    <li><a href="/Home/LichSuDatBan">Lịch sử đặt bàn</a></li>
+                </ul>
+            </li>
+            <li class="sidebar-dropdown">
+                <a href="#" onclick="toggleSidebarMenu(event, this)"><i class="fas fa-glass-cheers"></i> DỊCH VỤ TIỆC <i class="fas fa-chevron-down"></i></a>
+                <ul class="sidebar-submenu">
+                    <li><a href="/Home/MenuTiec">Menu Tiệc - Tại Gia</a></li>
+                    <li><a href="/Home/DatTiecTaiGia">Đặt tiệc ngay</a></li>
+                    <li><a href="/Home/LichSuDatTiec">Lịch sử đặt</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#">Đặt mang về <i class="fas fa-chevron-down"></i></a>
+                <ul class="dropdown-menu">
+                    <li><a href="/MangVe/DatMonMangVe">Mua mang về</a></li>
+                    <li><a href="/MangVe/LichSuMangVe">Lịch sử mua</a></li>
+                </ul>
+            </li>
+            <li><a href="/Home/TinTuc"><i class="fas fa-newspaper"></i> TIN TỨC</a></li>
+            <li><a href="/Home/LienHe"><i class="fas fa-address-book"></i> LIÊN HỆ</a></li>
+        </ul>
+    </div>
+
+    <div class="content-area">
+        <div class="section-header">
+            <span><i class="fas fa-star" style="color: #ffcc00;"></i> CÁC MÓN ĐẶC TRƯNG CỦA QUÁN</span>
+            <div style="display: flex; align-items: center;">
+                
+                @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                {
+                    <a href="/Admin/QuanLyMonDacTrung" style="background-color: #ffcc00; color: #000; padding: 6px 15px; border-radius: 5px; font-size: 13px; font-weight: bold; text-decoration: none; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">
+                        <i class="fas fa-edit"></i> Chỉnh sửa món
+                    </a>
+                }
+            </div>
+        </div>
+        
+        <div class="menu-grid">
+            @foreach (var item in Model)
+            {
+                <div class="menu-item">
+                    <!-- HTML ĐÃ SỬA: Bọc huy hiệu HOT vào Container để chạy hiệu ứng vầng sáng -->
+                    <div class="hot-badge-container">
+                        <div class="hot-badge">HOT</div>
+                    </div>
+                    
+                    <div class="img-wrapper">
+                        <img src="@(string.IsNullOrEmpty(item.HinhAnh) ? "https://via.placeholder.com/300x200?text=Mon+An" : "/images/" + item.HinhAnh)" alt="@item.TenMon" title="@item.TenMon" class="main-thumb" />
+                        <div class="img-popup">
+                            <img src="@(string.IsNullOrEmpty(item.HinhAnh) ? "https://via.placeholder.com/300x200?text=Mon+An" : "/images/" + item.HinhAnh)" alt="@item.TenMon" />
+                        </div>
+                    </div>
+                    
+                    <div class="menu-info">
+                        <h3>@item.TenMon</h3>
+                        <p>@item.MoTa</p>
+                        <!-- HTML ĐÃ SỬA: Bọc giá vào wrapper để đẩy xuống đáy -->
+                        <div class="price-wrapper">
+                            <p class="price">@item.Gia.ToString("N0") đ</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="floating-buttons">
+    <a href="tel:0947993499" class="float-btn btn-phone" title="Gọi Hotline">
+        <i class="fas fa-phone-alt"></i>
+    </a>
+    <a href="https://zalo.me/0947993499" target="_blank" class="float-btn btn-zalo" title="Chat Zalo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/2048px-Icon_of_Zalo.svg.png" alt="Zalo" style="width: 30px; height: 30px; filter: brightness(0) invert(1);" />
+    </a>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleSidebarMenu(event, element) {
+            event.preventDefault(); 
+            var parentLi = element.parentElement;
+            parentLi.classList.toggle('active');
+        }
+    </script>
+}

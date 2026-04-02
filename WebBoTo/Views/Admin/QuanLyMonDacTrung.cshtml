@@ -1,0 +1,57 @@
+﻿@model IEnumerable<WebBoTo.Models.MonAn>
+@{
+    ViewData["Title"] = "Quản lý món đặc trưng";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chỉnh sửa món đặc trưng</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background-color: #f4f6f9; color: #333; }
+        .container { max-width: 900px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #8B0000; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: middle; }
+        th { background: #f8f9fa; }
+        .checkbox-lg { width: 20px; height: 20px; cursor: pointer; }
+        .btn-save { background: #28a745; color: #fff; padding: 12px 25px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .btn-save:hover { background: #218838; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-star" style="color:#ffcc00;"></i> Chọn Món Đặc Trưng Cho Trang Chủ</h2>
+        <p>Tick chọn vào những món bạn muốn hiển thị ở mục "Các món đặc trưng của quán" trên trang chủ.</p>
+        
+        <form action="/Admin/UpdateMonDacTrung" method="post">
+            <table>
+                <tr>
+                    <th style="text-align: center;">Hiển thị</th>
+                    <th>Hình ảnh</th>
+                    <th>Tên món ăn</th>
+                    <th>Danh mục</th>
+                    <th>Giá tiền</th>
+                </tr>
+                @foreach (var mon in Model)
+                {
+                    <tr>
+                        <td style="text-align: center;">
+                            <input type="checkbox" name="selectedIds" value="@mon.Id_MonAn" class="checkbox-lg" @(mon.IsDacTrung ? "checked" : "") />
+                        </td>
+                        <td><img src="/images/@mon.HinhAnh" style="width: 70px; height: 50px; object-fit: cover; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/70x50'" /></td>
+                        <td style="font-weight: bold;">@mon.TenMon</td>
+                        <td>@mon.DanhMuc?.TenDanhMuc</td>
+                        <td>@mon.Gia.ToString("N0") VNĐ</td>
+                    </tr>
+                }
+            </table>
+            
+            <button type="submit" class="btn-save"><i class="fas fa-save"></i> Cập nhật trang chủ</button>
+            <a href="/" style="margin-left: 15px; color: #666; text-decoration: none;">Hủy bỏ</a>
+        </form>
+    </div>
+</body>
+</html>

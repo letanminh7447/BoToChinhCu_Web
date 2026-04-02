@@ -1,0 +1,67 @@
+﻿@model WebBoTo.Models.MenuTiec
+@{
+    ViewData["Title"] = "Thêm Menu Tiệc Mới";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm Menu Tiệc - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background-color: #f4f6f9; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #8B0000; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+        .form-group { margin-bottom: 20px; }
+        label { font-weight: bold; color: #333; display: block; margin-bottom: 8px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .grid-monan { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
+        .btn-save { background: #28a745; color: #fff; padding: 12px 25px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 15px; }
+        .btn-save:hover { background: #218838; }
+        .text-danger { color: #dc3545; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-plus-circle"></i> Thêm Menu Tiệc Mới</h2>
+        <form asp-action="CreateMenuTiec" method="post" enctype="multipart/form-data">
+            
+            <div class="form-group">
+                <label>Tên Menu Tiệc (VD: Uyên Ương 1, Phú Quý 2)</label>
+                <input type="text" asp-for="TenMenu" placeholder="Nhập tên Menu..." required />
+            </div>
+
+            <div class="form-group">
+                <label>Giá Thành (VNĐ)</label>
+                <input type="number" asp-for="Gia" placeholder="Nhập giá tiền..." required />
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-list-ol"></i> Danh sách 10 món ăn (Bỏ trống nếu không đủ món)</label>
+                @Html.ValidationMessage("DanhSachMonAn", new { @class = "text-danger" })
+                <div class="grid-monan">
+                    @for (int i = 1; i <= 10; i++)
+                    {
+                        <input type="text" name="MonAnList" placeholder="Món @i..." />
+                    }
+                </div>
+            </div>
+
+            <div class="grid-monan" style="background: none; border: none; padding: 0;">
+                <div class="form-group">
+                    <label>Hình Ảnh Minh Họa 1</label>
+                    <input type="file" name="HinhAnh1Upload" accept="image/*" />
+                </div>
+                <div class="form-group">
+                    <label>Hình Ảnh Minh Họa 2</label>
+                    <input type="file" name="HinhAnh2Upload" accept="image/*" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn-save"><i class="fas fa-save"></i> Lưu Menu Tiệc</button>
+            <a href="/Admin/QuanLyMenuTiec" style="margin-left: 15px; text-decoration: none; color: #666;">Hủy bỏ</a>
+        </form>
+    </div>
+</body>
+</html>

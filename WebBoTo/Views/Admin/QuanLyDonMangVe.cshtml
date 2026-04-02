@@ -1,0 +1,81 @@
+﻿@model IEnumerable<WebBoTo.Models.DonMangVe>
+@{
+    ViewData["Title"] = "Quản Lý Đơn Mang Về";
+    Layout = "_Layout"; 
+}
+
+<style>
+    .admin-container { max-width: 1200px; margin: 30px auto; color: #fff; }
+    .admin-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .admin-title { color: #f39c12; font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; text-transform: uppercase; }
+    
+    .table-custom { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: 10px; }
+    .table-custom th { background: #2c3e50; color: #f39c12; padding: 15px; text-align: left; text-transform: uppercase; font-size: 14px; border: none; }
+    .table-custom th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .table-custom th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; text-align: center; }
+    
+    .table-custom td { background: #242424; padding: 15px; border-top: 1px solid #333; border-bottom: 1px solid #333; vertical-align: middle; transition: 0.3s; }
+    .table-custom td:first-child { border-left: 1px solid #333; border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .table-custom td:last-child { border-right: 1px solid #333; border-top-right-radius: 8px; border-bottom-right-radius: 8px; text-align: center; }
+    
+    .table-custom tr:hover td { background: #2a2a2a; border-color: #f39c12; }
+    
+    .status-badge { padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 12px; }
+    .btn-detail { background: #17a2b8; color: #fff; border: none; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: 0.3s; }
+    .btn-detail:hover { background: #138496; color: #fff; box-shadow: 0 0 10px rgba(23, 162, 184, 0.5); }
+</style>
+
+<div class="admin-container">
+    <div class="admin-card">
+        <h2 class="admin-title"><i class="fas fa-motorcycle"></i> QUẢN LÝ ĐƠN MANG VỀ</h2>
+        
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Mã Đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Ngày đặt</th>
+                    <th>Hình thức</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var don in Model)
+                {
+                    <tr>
+                        <td style="color: #f39c12; font-weight: bold; font-size: 16px;"><strong>#MV@(don.Id_Don)</strong></td>
+                        <td><i class="fas fa-user text-secondary me-2"></i> @(don.TaiKhoan?.HoTen ?? "Khách vãng lai")</td>
+                        <td><i class="far fa-clock text-secondary me-2"></i> @don.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            @if(don.HinhThucNhan == 1) { <span class="text-info"><i class="fas fa-store"></i> Lấy tại quán</span> }
+                            else { <span class="text-success"><i class="fas fa-truck"></i> Giao tận nơi</span> }
+                        </td>
+                        <td style="font-weight: bold; color: #e74c3c;">@don.TongThanhToan.ToString("N0") đ</td>
+                        <td>
+                            @if (don.TrangThai == 0) { <span class="status-badge bg-warning text-dark">⏳ Chờ xác nhận</span> }
+                            else if (don.TrangThai == 1) { <span class="status-badge bg-info text-dark">🔧 Đang chuẩn bị</span> }
+                            else if (don.TrangThai == 2) { <span class="status-badge bg-primary text-light">🚚 Đang giao</span> }
+                            else if (don.TrangThai == 3) { <span class="status-badge bg-success text-light">✅ Hoàn thành</span> }
+                            else if (don.TrangThai == -1) { <span class="status-badge bg-danger text-light">❌ Đã hủy</span> }
+                        </td>
+                        <td>
+                            <a href="/Admin/ChiTietDonMangVe/@don.Id_Don" class="btn-detail">
+                                <i class="fas fa-eye"></i> Xem
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        
+        @if (!Model.Any())
+        {
+            <div class="text-center p-5 text-muted">
+                <i class="fas fa-box-open fa-3x mb-3"></i>
+                <h5>Chưa có đơn hàng nào</h5>
+            </div>
+        }
+    </div>
+</div>

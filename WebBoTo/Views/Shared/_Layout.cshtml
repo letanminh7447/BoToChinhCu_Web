@@ -1,0 +1,285 @@
+﻿@using WebBoTo.Models
+@inject WebBoTo.Data.ApplicationDbContext _context
+
+@{
+    // XỬ LÝ LẤY AVATAR TỪ DATABASE
+    string avatarUrl = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    if (User.Identity.IsAuthenticated)
+    {
+        var userName = User.Identity.Name;
+        var userAcc = _context.TaiKhoan.FirstOrDefault(t => t.Email == userName || t.HoTen == userName);
+        if (userAcc != null && !string.IsNullOrEmpty(userAcc.Avatar))
+        {
+            avatarUrl = $"/images/avatars/{userAcc.Avatar}";
+        }
+    }
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Bò Tơ Chính Cư</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #5a0b0b; 
+            --gold: #d4af37;
+            --dark-bg: #121212;
+            --nav-bg: #1a1a1a;
+        }
+
+        body { background-color: var(--dark-bg); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; }
+
+        /* --- TOP BAR --- */
+        .top-bar-auth {
+            background: #000;
+            padding: 8px 5%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+            font-size: 13px;
+            border-bottom: 1px solid #222;
+        }
+        .top-bar-auth a { color: #888; text-decoration: none; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        .top-bar-auth a:hover { color: var(--gold); }
+        .top-bar-avatar { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--gold); object-fit: cover; }
+
+        /* --- HEADER CHÍNH --- */
+        .header-main {
+            background: #2b0d0a; 
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-logo { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .header-logo img { height: 80px; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.3); }
+        .logo-text { font-size: 32px; font-weight: bold; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+
+        .header-contact { display: flex; gap: 15px; align-items: center; }
+        .contact-box {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            min-width: 165px;
+            transition: 0.3s;
+        }
+        .contact-box:hover { border-color: var(--gold); transform: translateY(-2px); background: rgba(212, 175, 55, 0.05); }
+        .contact-icon { color: var(--gold); font-size: 18px; }
+        .contact-info span { display: block; }
+        .contact-label { font-size: 11px; color: #aaa; text-transform: uppercase; }
+        .contact-val { font-size: 14px; font-weight: bold; color: #fff; }
+
+        /* --- NAVIGATION & DROPDOWN --- */
+        .main-nav {
+            background: var(--nav-bg);
+            border-bottom: 2px solid var(--primary);
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .nav-list {
+            list-style: none;
+            margin: 0; padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .nav-list > li { position: relative; } /* Giữ Dropdown không bị lệch */
+        
+        .nav-list > li > a {
+            display: block;
+            padding: 18px 22px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        .nav-list > li:hover > a { color: var(--gold); background: rgba(255,255,255,0.05); }
+
+        /* Menu con xổ xuống */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #1a1a1a;
+            min-width: 220px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            list-style: none;
+            padding: 5px 0;
+            margin: 0;
+            border-top: 3px solid var(--gold);
+            z-index: 10000;
+        }
+        .dropdown:hover .dropdown-menu { display: block; }
+        .dropdown-menu li a {
+            padding: 12px 20px;
+            color: #ccc;
+            text-decoration: none;
+            display: block;
+            font-size: 14px;
+            transition: 0.3s;
+            border-bottom: 1px solid #252525;
+        }
+        .dropdown-menu li a:hover { background: var(--primary); color: #fff; padding-left: 28px; }
+
+        /* Style đặc biệt cho nút Quản Lý */
+        .admin-nav-item > a { color: #ffcc00 !important; }
+        .admin-dropdown { border-top-color: #ffcc00 !important; }
+
+        /* --- PHẦN NỘI DUNG --- */
+        .render-body-container { min-height: 75vh; }
+        
+        footer { 
+            text-align: center; padding: 40px; background: #000; color: #666; 
+            font-size: 13px; border-top: 1px solid #222; margin-top: 60px;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- THANH AUTH (TOP BAR) -->
+    <div class="top-bar-auth">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <a href="/Account/ThongTinTaiKhoan">
+                <img src="@avatarUrl" alt="Avatar" class="top-bar-avatar" />
+                <span style="color: var(--gold);">Chào, @User.Identity.Name!</span>
+            </a>
+            <a href="/Account/Logout"><i class="fas fa-power-off"></i> Thoát</a>
+        }
+        else
+        {
+            <a href="/Account/Login"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
+            <a href="/Account/Register"><i class="fas fa-user-plus"></i> Đăng ký</a>
+        }
+    </div>
+
+    <!-- HEADER: LOGO & 3 Ô LIÊN HỆ -->
+    <header class="header-main">
+        <div class="header-logo" onclick="window.location.href='/'">
+            <img src="/images/logoquan.png" alt="Bò Tơ Chính Cư">
+            <span class="logo-text">Bò Tơ Chính Cư</span>
+        </div>
+        
+        <div class="header-contact">
+            <div class="contact-box">
+                <i class="fas fa-clock contact-icon"></i>
+                <div class="contact-info">
+                    <span class="contact-label">Giờ mở cửa</span>
+                    <span class="contact-val">8 AM - 10 PM</span>
+                </div>
+            </div>
+            <div class="contact-box">
+                <i class="fas fa-phone-alt contact-icon"></i>
+                <div class="contact-info">
+                    <span class="contact-label">Hotline</span>
+                    <span class="contact-val">0947.993.499</span>
+                </div>
+            </div>
+            <div class="contact-box">
+                <i class="fas fa-map-marker-alt contact-icon"></i>
+                <div class="contact-info">
+                    <span class="contact-label">Địa chỉ</span>
+                    <span class="contact-val">Củ Chi, TP. HCM</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- THANH MENU CHÍNH (CÓ PHÂN QUYỀN) -->
+    <nav class="main-nav">
+        <ul class="nav-list">
+            <li><a href="/">Trang chủ</a></li>
+            <li class="dropdown">
+                <a href="#">Thực đơn <i class="fas fa-chevron-down"></i></a>
+                <ul class="dropdown-menu">
+                    <li><a href="/Home/Menu">Menu tại Quán</a></li>
+                    <li><a href="/Home/DatBan">Đặt bàn ngay</a></li>
+                    <li><a href="/Home/LichSuDatBan">Lịch sử của bạn</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#">Dịch vụ tiệc <i class="fas fa-chevron-down"></i></a>
+                <ul class="dropdown-menu">
+                    <li><a href="/Home/MenuTiec">Menu Tiệc - Tại Gia</a></li>
+                    <li><a href="/Home/DatTiecTaiGia">Đặt tiệc ngay</a></li>
+                    <li><a href="/Home/LichSuDatTiec">Lịch sử đặt</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#">Đặt mang về <i class="fas fa-chevron-down"></i></a>
+                <ul class="dropdown-menu">
+                    <li><a href="/MangVe/DatMonMangVe">Mua mang về</a></li>
+                    <li><a href="/MangVe/LichSuMangVe">Lịch sử mua</a></li>
+                </ul>
+            </li>
+            <li><a href="/Home/TinTuc">Tin tức</a></li>
+            <li><a href="/Home/LienHe">Liên hệ</a></li>
+
+            @* PHÂN QUYỀN CHO QUẢN LÝ *@
+            @if (User.Identity.IsAuthenticated)
+            {
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="dropdown admin-nav-item">
+                        <a href="#"><i class="fas fa-user-shield"></i> TRANG QUẢN LÝ <i class="fas fa-chevron-down"></i></a>
+                        <ul class="dropdown-menu admin-dropdown">
+                            <li><a href="/Admin/QuanLyKhachHang"><i class="fas fa-users"></i> Khách hàng</a></li>
+                            <li><a href="/Admin/QuanLyMenu"><i class="fas fa-utensils"></i> Menu món</a></li>
+                            <li><a href="/Admin/QuanLyMenuTiec"><i class="fas fa-glass-cheers"></i> Menu tiệc</a></li>
+                            <li><a href="/Admin/QuanLyDatBan"><i class="fas fa-calendar-check"></i> Đơn đặt bàn</a></li>
+                            <li><a href="/Admin/QuanLyDatTiec"><i class="fas fa-calendar-check"></i> Đơn đặt tiệc</a></li>
+                            <li><a href="/Admin/QuanLyDonMangVe"><i class="fas fa-star"></i> Đơn mang về</a></li>
+                            <li><a href="/Admin/QuanLyMonDacTrung"><i class="fas fa-star"></i> Món nổi bật</a></li>
+                        </ul>
+                    </li>
+                }
+                else if (User.IsInRole("NhanVien"))
+                {
+                    <li class="dropdown admin-nav-item">
+                        <a href="#"><i class="fas fa-user-shield"></i> TRANG QUẢN LÝ <i class="fas fa-chevron-down"></i></a>
+                        <ul class="dropdown-menu admin-dropdown">
+                            <li><a href="/Admin/QuanLyDatBan"><i class="fas fa-calendar-check"></i> Đơn đặt bàn</a></li>
+                            <li><a href="/Admin/QuanLyDatTiec"><i class="fas fa-calendar-check"></i> Đơn đặt tiệc</a></li>
+                            <li><a href="#"><i class="fas fa-star"></i> Đơn mang về</a></li>
+                        </ul>
+                    </li>
+                }
+            }
+        </ul>
+    </nav>
+
+    <!-- NỘI DUNG TRANG CHỦ -->
+    <div class="render-body-container">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div style="color: var(--gold); font-weight: bold; font-size: 18px; margin-bottom: 10px;">BÒ TƠ CHÍNH CƯ</div>
+        <p>Hân hạnh phục vụ quý khách với những món bò tơ tươi ngon nhất mỗi ngày.</p>
+        <div style="margin: 20px 0; font-size: 20px;">
+            <i class="fab fa-facebook" style="margin: 0 10px; cursor:pointer"></i>
+            <i class="fab fa-youtube" style="margin: 0 10px; cursor:pointer"></i>
+        </div>
+        &copy; @DateTime.Now.Year - Hệ thống Nhà hàng Bò Tơ Chính Cư. <br>
+        <small>Phát triển bởi Team WebBoTo</small>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,63 @@
+﻿@model WebBoTo.Models.DanhMuc
+@{
+    ViewData["Title"] = "Thêm Danh Mục Mới";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm Danh Mục - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: 50px auto; background: #fff; padding: 30px 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        h2 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-top: 0; margin-bottom: 25px; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { font-weight: bold; color: #555; display: block; margin-bottom: 10px; font-size: 15px; }
+        
+        input[type="text"] { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+            font-size: 15px; 
+            outline: none; 
+            transition: 0.3s;
+        }
+        input[type="text"]:focus { border-color: #007bff; box-shadow: 0 0 5px rgba(0,123,255,0.3); }
+        
+        .btn-group { margin-top: 30px; display: flex; gap: 15px; }
+        
+        .btn-save { background: #007bff; color: #fff; padding: 12px 25px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-save:hover { background: #0056b3; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        
+        .btn-cancel { background: #6c757d; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-cancel:hover { background: #5a6268; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        
+        .text-danger { color: #dc3545; font-size: 13px; margin-top: 5px; display: block; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-folder-plus" style="color: #007bff;"></i> Thêm Danh Mục Mới</h2>
+        
+        <form asp-action="CreateDanhMuc" method="post">
+            <div class="form-group">
+                <label>Tên Danh Mục (Ví dụ: Bò Tơ Nướng, Lẩu Đặc Biệt, Đồ Uống...)</label>
+                <input type="text" asp-for="TenDanhMuc" placeholder="Nhập tên danh mục tại đây..." required autocomplete="off" />
+                <span asp-validation-for="TenDanhMuc" class="text-danger"></span>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn-save"><i class="fas fa-save"></i> Lưu Danh Mục</button>
+                <a href="/Admin/QuanLyMenu" class="btn-cancel"><i class="fas fa-times"></i> Hủy bỏ</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

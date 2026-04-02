@@ -1,0 +1,166 @@
+﻿@{
+    ViewData["Title"] = "Chi Tiết Đơn Tiệc";
+    var ct = ViewBag.ChiTietTiec;
+}
+
+<style>
+    body { background-color: #0a0a0a; } 
+    .invoice-wrapper { max-width: 850px; margin: 50px auto; padding: 0 15px; font-family: 'Segoe UI', sans-serif; }
+    
+    .invoice-card { 
+        background: #1c1c1c; 
+        border-radius: 15px; 
+        box-shadow: 0 15px 40px rgba(0,0,0,0.4); 
+        border: 1px solid #333;
+        overflow: hidden; 
+    }
+    
+    .invoice-header { 
+        background: linear-gradient(135deg, #8B0000 0%, #5a0000 100%); 
+        color: #fff; 
+        text-align: center; 
+        padding: 35px 20px; 
+        border-bottom: 4px solid #d4af37;
+        position: relative;
+    }
+    
+    .invoice-header h2 { margin: 0; color: #d4af37; text-transform: uppercase; font-weight: 800; letter-spacing: 2px; font-size: 26px; }
+    .order-code { margin-top: 10px; font-size: 16px; color: #eee; letter-spacing: 1px; }
+    
+    .invoice-body { padding: 40px; color: #eee; }
+    
+    .info-grid { 
+        display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; 
+        border-bottom: 1px dashed #444; padding-bottom: 30px; 
+    }
+    
+    .info-item { margin-bottom: 15px; display: flex; flex-direction: column; }
+    .info-label { font-size: 12px; color: #888; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; letter-spacing: 0.5px; }
+    .info-value { font-size: 16px; font-weight: 500; color: #fff; }
+    
+    .menu-box { 
+        background: rgba(255,255,255,0.03); padding: 25px; border-radius: 12px; 
+        border: 1px solid #333; border-left: 5px solid #d4af37; position: relative;
+    }
+    
+    .menu-title { color: #d4af37; margin-top: 0; margin-bottom: 15px; font-size: 20px; text-transform: uppercase; border-bottom: 1px solid #444; padding-bottom: 10px; }
+    .dish-list { color: #bbb; line-height: 1.8; font-size: 15px; margin-top: 10px; padding-left: 10px; }
+    
+    /* BẢNG TÍNH TIỀN CỌC DÀNH CHO KHÁCH HÀNG */
+    .total-box { 
+        background: rgba(0, 0, 0, 0.2); border: 1px solid #333; border-radius: 12px; 
+        margin-top: 30px; padding: 25px 30px; border-left: 5px solid #00ff88; 
+    }
+    .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #444; }
+    .total-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    
+    .total-label { color: #ccc; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .total-value { font-size: 18px; color: #fff; font-weight: 600; }
+    
+    .row-deposit .total-label { color: #d4af37; }
+    .row-deposit .total-value { color: #d4af37; }
+    
+    .row-final { margin-top: 10px; padding-top: 10px; }
+    .row-final .total-label { color: #fff; font-size: 18px; font-weight: bold; }
+    .row-final .total-value { font-size: 30px; font-weight: 900; color: #00ff88; }
+    
+    .btn-back {
+        display: inline-block; background: transparent; color: #d4af37; border: 1px solid #d4af37;
+        padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: bold;
+        text-transform: uppercase; font-size: 14px; transition: all 0.3s ease; letter-spacing: 1px;
+    }
+    .btn-back:hover { background: #d4af37; color: #111; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); transform: translateY(-2px); }
+    
+    .status-badge-custom { padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: inline-block; }
+</style>
+
+<div class="invoice-wrapper">
+    <div class="invoice-card">
+        <div class="invoice-header">
+            <h2><i class="fas fa-receipt me-2"></i> CHI TIẾT ĐƠN TIỆC</h2>
+            <p class="order-code">Mã Đơn Hàng: <strong>#T@(ct.Id_DatTiec)</strong></p>
+            
+            <div style="margin-top: 15px;">
+                @if (ct.STrangThai == 0) { 
+                    <span class="status-badge-custom" style="background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid #ffc107;"><i class="fas fa-clock"></i> Đang chờ xác nhận</span> 
+                }
+                else if (ct.STrangThai == 1) { 
+                    <span class="status-badge-custom" style="background: rgba(40, 167, 69, 0.2); color: #00ff88; border: 1px solid #00ff88;"><i class="fas fa-check-circle"></i> Đã xác nhận</span> 
+                }
+                else { 
+                    <span class="status-badge-custom" style="background: rgba(220, 53, 69, 0.2); color: #ff4d4d; border: 1px solid #ff4d4d;"><i class="fas fa-times-circle"></i> Đã bị hủy</span> 
+                }
+            </div>
+        </div>
+        
+        <div class="invoice-body">
+            <div class="info-grid">
+                <!-- Cột trái -->
+                <div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-user-tie me-1"></i> Khách hàng</div>
+                        <div class="info-value">@ct.HoTen</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-address-book me-1"></i> Liên hệ (SĐT / Email)</div>
+                        <div class="info-value">@ct.SoDienThoai <br/> <span style="font-size: 14px; color: #aaa;">@ct.Email</span></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-map-marker-alt me-1"></i> Địa chỉ tổ chức</div>
+                        <div class="info-value" style="color: #d4af37;">@ct.DiaChi</div>
+                    </div>
+                </div>
+                
+                <!-- Cột phải -->
+                <div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-calendar-check me-1"></i> Ngày giờ đãi tiệc</div>
+                        <div class="info-value" style="color: #ff4d4d;">@ct.ThoiGian.ToString("dd/MM/yyyy - HH:mm")</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-history me-1"></i> Thời gian đặt đơn</div>
+                        <div class="info-value">@ct.NgayTao.ToString("dd/MM/yyyy - HH:mm")</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-comment-alt me-1"></i> Ghi chú yêu cầu</div>
+                        <div class="info-value" style="font-style: italic; color: #aaa;">
+                            @(string.IsNullOrEmpty(ct.GhiChu) ? "Không có yêu cầu thêm." : ct.GhiChu)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-box">
+                <h4 class="menu-title"><i class="fas fa-concierge-bell me-2"></i> SET MENU: @ct.TenMenu</h4>
+                <p style="font-size: 16px;"><strong>Quy mô tiệc:</strong> <span style="color:#d4af37; font-size: 18px; font-weight: bold;">@ct.SoLuongBan</span> bàn</p>
+                
+                <div style="margin-top: 15px;">
+                    <strong style="color: #888; text-transform: uppercase; font-size: 13px;">Thực đơn chi tiết:</strong>
+                    <div class="dish-list">
+                        @Html.Raw(ct.DanhSachMonAn.Replace("\n", "<br/> <i class='fas fa-check' style='color:#d4af37; margin-right:8px; font-size:12px;'></i> "))
+                    </div>
+                </div>
+            </div>
+
+            <!-- BẢNG TÍNH TIỀN CỌC VÀ CÒN LẠI SỬ DỤNG BIẾN TienCocTiec -->
+            <div class="total-box">
+                <div class="total-row">
+                    <span class="total-label">Tổng Chi Phí Dự Kiến:</span>
+                    <span class="total-value">@ct.TongTien.ToString("N0") VNĐ</span>
+                </div>
+                <div class="total-row row-deposit">
+                    <span class="total-label"><i class="fas fa-hand-holding-usd me-2"></i>Tiền Đã Đặt Cọc:</span>
+                    <span class="total-value">- @ct.TienCocTiec.ToString("N0") VNĐ</span>
+                </div>
+                <div class="total-row row-final">
+                    <span class="total-label">SỐ TIỀN CÒN LẠI:</span>
+                    <span class="total-value">@((ct.TongTien - ct.TienCocTiec).ToString("N0")) <span style="font-size: 18px; color: #fff;">VNĐ</span></span>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="/Home/LichSuDatTiec" class="btn-back"><i class="fas fa-arrow-left me-2"></i> Quay lại lịch sử</a>
+            </div>
+        </div>
+    </div>
+</div>

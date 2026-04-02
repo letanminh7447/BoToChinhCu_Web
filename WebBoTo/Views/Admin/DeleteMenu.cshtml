@@ -1,0 +1,15 @@
+﻿@model WebBoTo.Models.MonAn
+@{
+    ViewData["Title"] = "Xóa món"; Layout = null;
+}
+<div style="max-width:500px; margin: 50px auto; font-family:sans-serif; text-align:center;">
+    <h2 style="color:red;">Xác nhận xóa món ăn</h2>
+    <p>Bạn có chắc chắn muốn xóa món <strong>@Model.TenMon</strong> không?</p>
+    <img src="/images/@Model.HinhAnh" style="max-width:200px;" onerror="this.style.display='none'" />
+    <form method="post" action="/Admin/DeleteMenu">
+        <input type="hidden" name="Id" value="@Model.Id_MonAn" />
+        <br />
+        <button type="submit" style="padding:10px 20px; background:red; color:#fff; border:none; cursor:pointer;">Xác nhận Xóa</button>
+        <a href="/Admin/QuanLyMenu" style="margin-left:10px;">Hủy</a>
+    </form>
+</div>
