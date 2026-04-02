@@ -9,7 +9,7 @@ namespace WebBoTo.Models
         public int Id_DanhGia { get; set; }
         public int Id_TK { get; set; }
         [ForeignKey("Id_TK")]
-        public virtual TaiKhoan TaiKhoan { get; set; }
+        public virtual TaiKhoan? TaiKhoan { get; set; }
 
         public int SoSao { get; set; }
         public string? BinhLuan { get; set; }
@@ -18,6 +18,6 @@ namespace WebBoTo.Models
         public string? AdminReply { get; set; } // Phản hồi của quán
 
         // Liên kết 1 Đánh giá có nhiều Hình ảnh
-        public virtual ICollection<HinhAnhDanhGia> HinhAnhDanhGias { get; set; }
+        public virtual ICollection<HinhAnhDanhGia>? HinhAnhDanhGias { get; set; }
     }
 }

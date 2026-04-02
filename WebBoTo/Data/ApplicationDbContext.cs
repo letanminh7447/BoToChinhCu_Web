@@ -26,7 +26,12 @@ namespace WebBoTo.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+            foreach (var property in modelBuilder.Model.GetEntityTypes()
+        .SelectMany(t => t.GetProperties())
+        .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
+            {
+                property.SetColumnType("decimal(18,2)");
+            }
             // Code tạo tài khoản Admin cũ của bạn giữ nguyên...
             modelBuilder.Entity<TaiKhoan>().HasData(
                 new TaiKhoan { Id_TK = 1, HoTen = "Admin", SoDienThoai = "0123456789", Email = "admin@webboto.vn", MatKhau = "Admin@123", VaiTro = "Admin" }
